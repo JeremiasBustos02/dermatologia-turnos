@@ -1,10 +1,10 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum UserRole {
@@ -28,7 +28,7 @@ model User {
   firstName String
   lastName  String
 
-  email    String?
+  email    String? @unique
   password String
 
   role UserRole
@@ -45,7 +45,7 @@ model Professional {
   firstName String
   lastName  String
 
-  licenseNumber String?
+  licenseNumber String? @unique
 
   specialties Specialty[]
   coverages   Coverage[]
