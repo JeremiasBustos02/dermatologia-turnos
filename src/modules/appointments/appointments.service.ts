@@ -94,18 +94,36 @@ export class AppointmentsService {
   }
 
   findAll() {
-    return `This action returns all appointments`;
+    return this.prisma.appointment.findMany({
+      include: {
+        patient: true,
+        professional: true,
+        coverage: true,
+      },
+    });
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} appointment`;
+    return this.prisma.appointment.findUnique({
+      where: { id },
+      include: {
+        patient: true,
+        professional: true,
+        coverage: true,
+      },
+    });
   }
 
   update(id: number, updateAppointmentDto: UpdateAppointmentDto) {
-    return `This action updates a #${id} appointment`;
+    return this.prisma.appointment.update({
+      where: { id },
+      data: updateAppointmentDto,
+    });
   }
 
   remove(id: number) {
-    return `This action removes a #${id} appointment`;
+    return this.prisma.appointment.delete({
+      where: { id },
+    });
   }
 }
