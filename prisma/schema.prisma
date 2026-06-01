@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  PATIENT
+  RECEPTIONIST
+  ADMIN
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model User {
+  id Int @id @default(autoincrement())
+
+  dni String @unique
+
+  firstName String
+  lastName  String
+
+  email    String? @unique
+  password String
+
+  role UserRole
+
+  appointments Appointment[] @relation("PatientAppointments")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Professional {
+  id Int @id @default(autoincrement())
+
+  firstName String
+  lastName  String
+
+  licenseNumber String? @unique
+
+  specialties Specialty[]
+  coverages   Coverage[]
+
+  schedules Schedule[]
+
+  appointments Appointment[] @relation("ProfessionalAppointments")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Specialty {
+  id Int @id @default(autoincrement())
+
+  name String @unique
+
+  description String?
+
+  professionals Professional[]
+}
+
+model Coverage {
+  id Int @id @default(autoincrement())
+
+  name String @unique
+
+  professionals Professional[]
+
+  appointments Appointment[]
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model Schedule {
+  id Int @id @default(autoincrement())
+
+  professionalId Int
+
+  professional Professional @relation(fields: [professionalId], references: [id])
+
+  dayOfWeek DayOfWeek
+
+  startTime String
+  endTime   String
+
+  appointmentDuration Int
+}
+
+model Appointment {
+  id Int @id @default(autoincrement())
+
+  patientId Int
+  professionalId Int
+  coverageId Int
+
+  dateTime DateTime
+
+  status AppointmentStatus @default(PENDING)
+
+  notes String?
+
+  patient User @relation("PatientAppointments", fields: [patientId], references: [id])
+
+  professional Professional @relation("ProfessionalAppointments", fields: [professionalId], references: [id])
+
+  coverage Coverage @relation(fields: [coverageId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([professionalId, dateTime])
+  @@index([patientId])
+}
