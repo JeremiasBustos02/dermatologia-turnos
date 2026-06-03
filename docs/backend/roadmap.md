@@ -56,11 +56,11 @@
 
 * [x] Delete
 
-* [ ] Validar día de atención
+* [x] Validar día de atención
 
-* [ ] Validar rango horario
+* [x] Validar rango horario
 
-* [ ] Validar duración de turno
+* [x] Validar duración de turno
 
 ---
 
@@ -78,17 +78,17 @@
 
 * [x] Evitar duplicados
 
-* [ ] Listar turnos
+* [x] Listar turnos
 
-* [ ] Obtener turno
+* [x] Obtener turno
 
-* [ ] Confirmar turno
+* [x] Confirmar turno
 
-* [ ] Cancelar turno
+* [x] Cancelar turno
 
-* [ ] Completar turno
+* [x] Completar turno
 
-* [ ] Horarios disponibles
+* [x] Horarios disponibles
 
 ---
 

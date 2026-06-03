@@ -14,15 +14,7 @@ export class AppointmentsService {
   async create(dto: CreateAppointmentDto) {
     const appointmentDate = new Date(dto.dateTime);
 
-    if (isNaN(appointmentDate.getTime())) {
-      throw new BadRequestException('Fecha inválida.');
-    }
-
-    if (appointmentDate < new Date()) {
-      throw new BadRequestException(
-        'No se pueden reservar turnos en fechas pasadas.',
-      );
-    }
+    await this.validateAppointmentDate(appointmentDate);
 
     await this.validatePatient(dto.patientId);
 
@@ -64,18 +56,65 @@ export class AppointmentsService {
     });
   }
 
-  findOne(id: number) {
-    return this.prisma.appointment.findUnique({
-      where: { id },
-      include: {
-        patient: true,
-        professional: true,
-        coverage: true,
-      },
-    });
+  async findOne(id: number) {
+    const appointment =
+      await this.prisma.appointment.findUnique({
+        where: { id },
+        include: {
+          patient: true,
+          professional: true,
+          coverage: true,
+        },
+      });
+
+    if (!appointment) {
+      throw new NotFoundException(
+        `Turno con ID ${id} no encontrado.`,
+      );
+    }
+
+    return appointment;
   }
 
-  update(id: number, updateAppointmentDto: UpdateAppointmentDto) {
+  async update(id: number, updateAppointmentDto: UpdateAppointmentDto) {
+    const appointment = await this.findOne(id);
+
+    const patientId =
+      updateAppointmentDto.patientId ?? appointment.patientId;
+
+    const professionalId =
+      updateAppointmentDto.professionalId ?? appointment.professionalId;
+
+    const coverageId =
+      updateAppointmentDto.coverageId ?? appointment.coverageId;
+
+    const appointmentDate =
+      updateAppointmentDto.dateTime
+        ? new Date(updateAppointmentDto.dateTime)
+        : appointment.dateTime;
+
+    await this.validateAppointmentDate(appointmentDate);
+
+    await this.validatePatient(patientId);
+
+    await this.validateProfessional(professionalId);
+
+    await this.validateCoverage(
+      professionalId,
+      coverageId,
+    );
+
+    await this.validateSchedule(
+      professionalId,
+      appointmentDate,
+    );
+
+    await this.validateAppointmentConflict(
+      professionalId,
+      appointmentDate,
+      id,
+    );
+
     return this.prisma.appointment.update({
       where: { id },
       data: updateAppointmentDto,
@@ -228,12 +267,21 @@ export class AppointmentsService {
   private async validateAppointmentConflict(
     professionalId: number,
     appointmentDate: Date,
+    ignoreAppointmentId?: number,
   ) {
     const existingAppointment =
       await this.prisma.appointment.findFirst({
         where: {
           professionalId,
           dateTime: appointmentDate,
+          status: {
+            not: 'CANCELLED',
+          },
+          id: ignoreAppointmentId
+            ? {
+              not: ignoreAppointmentId,
+            }
+            : undefined,
         },
       });
 
@@ -284,6 +332,29 @@ export class AppointmentsService {
     return slots;
   }
 
+  private validateAppointmentDate(
+    appointmentDate: Date,
+  ) {
+    if (isNaN(appointmentDate.getTime())) {
+      throw new BadRequestException('Fecha inválida.');
+    }
+
+    if (appointmentDate < new Date()) {
+      throw new BadRequestException(
+        'No se pueden reservar turnos en fechas pasadas.',
+      );
+    }
+
+    if (
+      appointmentDate.getSeconds() !== 0 ||
+      appointmentDate.getMilliseconds() !== 0
+    ) {
+      throw new BadRequestException(
+        'Los turnos deben reservarse en horarios exactos.',
+      );
+    }
+  }
+
   async getAvailableSlots(professionalId: number, date: string) {
     const targetDate = new Date(date);
 
@@ -327,11 +398,14 @@ export class AppointmentsService {
     const appointments = await this.prisma.appointment.findMany({
       where: {
         professionalId,
+        status: {
+          not: 'CANCELLED',
+        },
         dateTime: {
           gte: startOfDay,
           lte: endOfDay,
         },
-      },
+      }
     });
 
     const takenSlots = appointments.map((a) =>
@@ -345,4 +419,55 @@ export class AppointmentsService {
     return availableSlots;
   }
 
+  async confirmAppointment(id: number) {
+    const appointment = await this.findOne(id);
+
+    if (appointment.status !== 'PENDING') {
+      throw new BadRequestException(
+        'Solo se pueden confirmar turnos pendientes.',
+      );
+    }
+
+    return this.prisma.appointment.update({
+      where: { id },
+      data: { status: 'CONFIRMED' },
+    });
+  }
+
+  async cancelAppointment(id: number) {
+    const appointment = await this.findOne(id);
+
+    if (appointment.status === 'CANCELLED') {
+      throw new BadRequestException(
+        'El turno ya está cancelado.',
+      );
+    }
+
+    if (appointment.status === 'COMPLETED') {
+      throw new BadRequestException(
+        'No se pueden cancelar turnos completados.',
+      );
+    }
+
+    return this.prisma.appointment.update({
+      where: { id },
+      data: { status: 'CANCELLED' },
+    });
+  }
+
+  async completeAppointment(id: number) {
+    const appointment = await this.findOne(id);
+
+    if (appointment.status !== 'CONFIRMED') {
+      throw new BadRequestException(
+        'Solo se pueden completar turnos confirmados.',
+      );
+    }
+
+    return this.prisma.appointment.update({
+      where: { id },
+      data: { status: 'COMPLETED' },
+    });
+  }
 }
+
