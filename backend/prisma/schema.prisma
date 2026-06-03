@@ -39,6 +39,8 @@ model User {
   updatedAt DateTime @updatedAt
 
   deletedAt DateTime?
+
+  hashedRefreshToken String?
 }
 
 model Professional {
