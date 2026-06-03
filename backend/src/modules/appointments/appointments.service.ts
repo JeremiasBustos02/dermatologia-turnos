@@ -60,19 +60,29 @@ export class AppointmentsService {
     const { page = 1, limit = 10, ...queryFilters } = filters;
     const skip = (page - 1) * limit;
 
-    let dateTime: Date | undefined;
-    if (queryFilters.dateTime) {
-      dateTime = new Date(queryFilters.dateTime);
-      if (isNaN(dateTime.getTime())) {
-        throw new BadRequestException('Fecha inválida.');
-      }
+    let dateFilter = {};
+
+    if (queryFilters.dateFrom && queryFilters.dateTo) {
+      dateFilter = {
+        dateTime: {
+          gte: dayjs.tz(queryFilters.dateFrom).startOf('day').toDate(),
+          lte: dayjs.tz(queryFilters.dateTo).endOf('day').toDate(),
+        },
+      };
+    } else if (queryFilters.dateFrom) {
+      dateFilter = {
+        dateTime: {
+          gte: dayjs.tz(queryFilters.dateFrom).startOf('day').toDate(),
+          lte: dayjs.tz(queryFilters.dateFrom).endOf('day').toDate(),
+        },
+      };
     }
 
     const whereCondition = {
       patientId: queryFilters.patientId,
       professionalId: queryFilters.professionalId,
       coverageId: queryFilters.coverageId,
-      dateTime: dateTime,
+      ...dateFilter,
       notes: queryFilters.notes
         ? {
           contains: queryFilters.notes,
@@ -92,17 +102,18 @@ export class AppointmentsService {
           professional: true,
           coverage: true,
         },
+        orderBy: {
+          dateTime: 'asc',
+        },
       }),
     ]);
-
-    const lastPage = Math.ceil(total / limit);
 
     return {
       data,
       meta: {
         total,
         page,
-        lastPage: lastPage === 0 ? 1 : lastPage,
+        lastPage: Math.ceil(total / limit) || 1,
       },
     };
   }
