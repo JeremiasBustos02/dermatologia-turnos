@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards} from '@nestjs/common';
 import { CoveragesService } from './coverages.service';
 import { CreateCoverageDto } from './dto/create-coverage.dto';
 import { UpdateCoverageDto } from './dto/update-coverage.dto';
 import { FilterCoveragesDto } from './dto/FiltersCoveragesDto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('coverages')
 export class CoveragesController {
   constructor(private readonly coveragesService: CoveragesService) {}
