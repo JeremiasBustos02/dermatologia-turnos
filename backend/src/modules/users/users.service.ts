@@ -17,6 +17,13 @@ export class UsersService {
         ...dto,
         password: hashedPassword,
       },
+      select: {
+        id: true,
+        dni: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        role: true,}
     });
   }
 

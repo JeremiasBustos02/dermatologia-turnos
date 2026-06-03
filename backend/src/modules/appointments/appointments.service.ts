@@ -7,6 +7,15 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { FiltersAppointmentsDto } from './dto/FiltersAppointmentsDto';
+import { AppointmentStatus } from '@prisma/client';
+
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault('America/Argentina/Buenos_Aires');
 
 @Injectable()
 export class AppointmentsService {
@@ -107,8 +116,8 @@ export class AppointmentsService {
     const appointment = await this.findOne(id);
 
     if (
-      appointment.status === 'COMPLETED' ||
-      appointment.status === 'CANCELLED'
+      appointment.status === AppointmentStatus.COMPLETED ||
+      appointment.status === AppointmentStatus.CANCELLED
     ) {
       throw new BadRequestException(
         'No se puede modificar un turno finalizado.',
@@ -230,6 +239,8 @@ export class AppointmentsService {
     professionalId: number,
     appointmentDate: Date,
   ) {
+    const localDate = dayjs(appointmentDate).tz('America/Argentina/Buenos_Aires');
+
     const dayMap = [
       'SUNDAY',
       'MONDAY',
@@ -240,8 +251,7 @@ export class AppointmentsService {
       'SATURDAY',
     ] as const;
 
-    const appointmentDay =
-      dayMap[appointmentDate.getDay()];
+    const appointmentDay = dayMap[localDate.day()];
 
     const schedules = await this.prisma.schedule.findMany({
       where: {
@@ -256,9 +266,7 @@ export class AppointmentsService {
       );
     }
 
-    const appointmentMinutes =
-      appointmentDate.getHours() * 60 +
-      appointmentDate.getMinutes();
+    const appointmentMinutes = localDate.hour() * 60 + localDate.minute();
 
     const validSchedule = schedules.find((schedule) => {
       const [startHour, startMinute] =
@@ -267,11 +275,8 @@ export class AppointmentsService {
       const [endHour, endMinute] =
         schedule.endTime.split(':').map(Number);
 
-      const startMinutes =
-        startHour * 60 + startMinute;
-
-      const endMinutes =
-        endHour * 60 + endMinute;
+      const startMinutes = startHour * 60 + startMinute;
+      const endMinutes = endHour * 60 + endMinute;
 
       const insideRange =
         appointmentMinutes >= startMinutes &&
@@ -279,8 +284,7 @@ export class AppointmentsService {
 
       const respectsDuration =
         (appointmentMinutes - startMinutes) %
-        schedule.appointmentDuration ===
-        0;
+        schedule.appointmentDuration === 0;
 
       return insideRange && respectsDuration;
     });
@@ -421,17 +425,15 @@ export class AppointmentsService {
       this.generateAvailableSlots(schedule),
     );
 
-    const startOfDay = new Date(targetDate);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(targetDate);
-    endOfDay.setHours(23, 59, 59, 999);
+    const localTargetDate = dayjs(targetDate).tz('America/Argentina/Buenos_Aires');
+    const startOfDay = localTargetDate.startOf('day').toDate();
+    const endOfDay = localTargetDate.endOf('day').toDate();
 
     const appointments = await this.prisma.appointment.findMany({
       where: {
         professionalId,
         status: {
-          not: 'CANCELLED',
+          not: AppointmentStatus.CANCELLED,
         },
         dateTime: {
           gte: startOfDay,
@@ -441,7 +443,7 @@ export class AppointmentsService {
     });
 
     const takenSlots = appointments.map((a) =>
-      new Date(a.dateTime).toTimeString().slice(0, 5),
+      dayjs(a.dateTime).tz('America/Argentina/Buenos_Aires').format('HH:mm')
     );
 
     const availableSlots = allSlots.filter(
@@ -454,7 +456,7 @@ export class AppointmentsService {
   async confirmAppointment(id: number) {
     const appointment = await this.findOne(id);
 
-    if (appointment.status !== 'PENDING') {
+    if (appointment.status !== AppointmentStatus.PENDING) {
       throw new BadRequestException(
         'Solo se pueden confirmar turnos pendientes.',
       );
@@ -462,20 +464,20 @@ export class AppointmentsService {
 
     return this.prisma.appointment.update({
       where: { id },
-      data: { status: 'CONFIRMED' },
+      data: { status: AppointmentStatus.CONFIRMED },
     });
   }
 
   async cancelAppointment(id: number) {
     const appointment = await this.findOne(id);
 
-    if (appointment.status === 'CANCELLED') {
+    if (appointment.status === AppointmentStatus.CANCELLED) {
       throw new BadRequestException(
         'El turno ya está cancelado.',
       );
     }
 
-    if (appointment.status === 'COMPLETED') {
+    if (appointment.status === AppointmentStatus.COMPLETED) {
       throw new BadRequestException(
         'No se pueden cancelar turnos completados.',
       );
@@ -483,14 +485,14 @@ export class AppointmentsService {
 
     return this.prisma.appointment.update({
       where: { id },
-      data: { status: 'CANCELLED' },
+      data: { status: AppointmentStatus.CANCELLED },
     });
   }
 
   async completeAppointment(id: number) {
     const appointment = await this.findOne(id);
 
-    if (appointment.status !== 'CONFIRMED') {
+    if (appointment.status !== AppointmentStatus.CONFIRMED) {
       throw new BadRequestException(
         'Solo se pueden completar turnos confirmados.',
       );
@@ -498,7 +500,7 @@ export class AppointmentsService {
 
     return this.prisma.appointment.update({
       where: { id },
-      data: { status: 'COMPLETED' },
+      data: { status: AppointmentStatus.COMPLETED },
     });
   }
 }

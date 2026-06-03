@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { ProfessionalsService } from './professionals.service';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
@@ -7,8 +7,11 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { RolesGuard } from '../auth/guards/roles-guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth('access-token')
+@ApiTags('Professionals')
 @Controller('professionals')
 export class ProfessionalsController {
   constructor(private readonly professionalsService: ProfessionalsService) {}
@@ -27,19 +30,19 @@ export class ProfessionalsController {
 
   @Get(':id')
   @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
-  findOne(@Param('id') id: string) {
-    return this.professionalsService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.professionalsService.findOne(id);
   }
 
   @Patch(':id')
   @Roles(UserRole.ADMIN)
-  update(@Param('id') id: string, @Body() updateProfessionalDto: UpdateProfessionalDto) {
-    return this.professionalsService.update(+id, updateProfessionalDto);
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateProfessionalDto: UpdateProfessionalDto) {
+    return this.professionalsService.update(id, updateProfessionalDto);
   }
 
   @Delete(':id')
   @Roles(UserRole.ADMIN)
-  remove(@Param('id') id: string) {
-    return this.professionalsService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.professionalsService.remove(id);
   }
 }
