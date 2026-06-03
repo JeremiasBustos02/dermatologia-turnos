@@ -57,39 +57,54 @@ export class AppointmentsService {
   }
 
   async findAll(filters: FiltersAppointmentsDto) {
+    const { page = 1, limit = 10, ...queryFilters } = filters;
+    const skip = (page - 1) * limit;
+
     let dateTime: Date | undefined;
-
-    if (filters.dateTime) {
-      dateTime = new Date(filters.dateTime);
-
+    if (queryFilters.dateTime) {
+      dateTime = new Date(queryFilters.dateTime);
       if (isNaN(dateTime.getTime())) {
-        throw new BadRequestException(
-          'Fecha inválida.',
-        );
+        throw new BadRequestException('Fecha inválida.');
       }
     }
 
-    return this.prisma.appointment.findMany({
-      where: {
-        patientId: filters.patientId,
-        professionalId: filters.professionalId,
-        coverageId: filters.coverageId,
-        dateTime: filters.dateTime
-          ? new Date(filters.dateTime)
-          : undefined,
-        notes: filters.notes
-          ? {
-            contains: filters.notes,
-            mode: 'insensitive',
-          }
-          : undefined,
+    const whereCondition = {
+      patientId: queryFilters.patientId,
+      professionalId: queryFilters.professionalId,
+      coverageId: queryFilters.coverageId,
+      dateTime: dateTime,
+      notes: queryFilters.notes
+        ? {
+          contains: queryFilters.notes,
+          mode: 'insensitive' as const,
+        }
+        : undefined,
+    };
+
+    const [total, data] = await this.prisma.$transaction([
+      this.prisma.appointment.count({ where: whereCondition }),
+      this.prisma.appointment.findMany({
+        where: whereCondition,
+        skip,
+        take: limit,
+        include: {
+          patient: true,
+          professional: true,
+          coverage: true,
+        },
+      }),
+    ]);
+
+    const lastPage = Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        lastPage: lastPage === 0 ? 1 : lastPage,
       },
-      include: {
-        patient: true,
-        professional: true,
-        coverage: true,
-      },
-    });
+    };
   }
 
   async findOne(id: number) {

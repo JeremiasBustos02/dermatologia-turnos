@@ -1,6 +1,7 @@
 import { IsOptional, IsString, IsArray} from 'class-validator';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
-export class FilterProfessionalsDto {
+export class FilterProfessionalsDto extends PaginationDto {
     @IsOptional()
     @IsString()
     firstName?: string;

@@ -1,6 +1,7 @@
 import { IsOptional, IsString, IsNumber } from 'class-validator';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
-export class FiltersAppointmentsDto {
+export class FiltersAppointmentsDto extends PaginationDto {
     @IsOptional()
     @IsNumber()
     patientId?: number;
