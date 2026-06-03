@@ -1,124 +1,51 @@
-# Roadmap
+---
 
-## Infraestructura
+`roadmap.md` 
 
-* [x] NestJS
-* [x] PostgreSQL
-* [x] Prisma
-* [x] DTO Validation
-* [ ] JWT
-* [ ] Guards
-* [ ] Roles
+```markdown
+# Roadmap del Proyecto
+
+## ✅ Fase 1: Infraestructura y Base (COMPLETADO)
+- [x] Setup NestJS + Prisma + PostgreSQL
+- [x] Configuración de DTOs y ValidationPipe
+- [x] Manejo global de excepciones (PrismaExceptionFilter)
+- [x] Documentación interactiva con Swagger y configuración de CORS
+- [x] Autenticación con JWT (AuthModule, JwtStrategy)
+- [x] Autorización basada en Roles (RolesGuard, Roles Decorator)
+
+## ✅ Fase 2: Módulos Core (COMPLETADO)
+- [x] **Usuarios:** CRUD, encriptación bcrypt, búsqueda por DNI y filtros.
+- [x] **Catálogos:** CRUD de Especialidades y Coberturas Médicas (Obras Sociales).
+- [x] **Profesionales:** CRUD, relación N:M con especialidades y coberturas.
+- [x] **Agendas (Schedules):** Configuración de días de atención, rango horario y duración de turnos. Validación de superposiciones.
+
+## ✅ Fase 3: Motor de Turnos (COMPLETADO)
+- [x] Búsqueda de franjas horarias disponibles (`/available-slots`).
+- [x] Normalización de Zonas Horarias (Timezones) con `dayjs` (evita desfasajes internacionales).
+- [x] Creación de turnos con validación estricta (paciente, profesional, obra social coincidente).
+- [x] Filtro anti-duplicados y validación de horarios fuera de agenda.
+- [x] Transiciones de estado lógicas (`PENDING` -> `CONFIRMED` -> `COMPLETED` / `CANCELLED`).
 
 ---
 
-## Catálogos
-
-### Specialties
-
-* [x] Create
-* [x] Read
-* [x] Update
-* [x] Delete
-
-### Coverages
-
-* [x] Create
-* [x] Read
-* [x] Update
-* [x] Delete
+## 🚧 Fase 4: Refinamiento Backend (En progreso - "Camino A")
+- [ ] **Soft Delete:** Implementar borrado lógico en tablas clave (Usuarios, Profesionales, Turnos) mediante Prisma Extensions o Middleware para mantener la integridad histórica.
+- [ ] **Rate Limiting:** Implementar `ThrottlerModule` para proteger endpoints sensibles (como `/auth/login`) contra ataques de fuerza bruta.
+- [ ] **Seguridad HTTP:** Configurar `Helmet` para proteger las cabeceras HTTP.
+- [ ] **Paginación:** Agregar metadatos de paginación (`page`, `limit`, `total`) en los endpoints `findAll` de usuarios y turnos.
+- [ ] **Auditoría Básica / Logs:** Implementar un logger profesional (ej. Winston o Pino) para registrar acciones críticas (turnos cancelados, logins fallidos).
 
 ---
 
-## Profesionales
+## 🗓️ Fase 5: Frontend (Pendiente)
+- [ ] Inicializar proyecto React + TypeScript + Vite.
+- [ ] Configurar TailwindCSS.
+- [ ] Pantalla de Login y manejo de sesión (Almacenamiento seguro del JWT).
+- [ ] Dashboard Principal.
+- [ ] Vistas de ABM (Usuarios, Profesionales, Especialidades).
+- [ ] Vista de Agenda Diaria y Calendario interactivo.
 
-* [x] Create
-
-* [x] Read
-
-* [x] Update
-
-* [x] Delete
-
-* [x] Asociar especialidades
-
-* [x] Asociar coberturas
-
----
-
-## Horarios
-
-* [x] Create
-
-* [x] Read
-
-* [x] Update
-
-* [x] Delete
-
-* [x] Validar día de atención
-
-* [x] Validar rango horario
-
-* [x] Validar duración de turno
-
----
-
-## Turnos
-
-* [x] Crear turno
-
-* [x] Validar paciente
-
-* [x] Validar profesional
-
-* [x] Validar cobertura
-
-* [x] Validar cobertura aceptada
-
-* [x] Evitar duplicados
-
-* [x] Listar turnos
-
-* [x] Obtener turno
-
-* [x] Confirmar turno
-
-* [x] Cancelar turno
-
-* [x] Completar turno
-
-* [x] Horarios disponibles
-
----
-
-## Usuarios
-
-* [x] CRUD básico
-
-* [x] Buscar por DNI
-
-* [ ] Login
-
----
-
-## Frontend
-
-* [ ] Login
-* [ ] Dashboard
-* [ ] Gestión de profesionales
-* [ ] Gestión de horarios
-* [ ] Gestión de coberturas
-* [ ] Gestión de especialidades
-* [ ] Gestión de turnos
-* [ ] Calendario
-
----
-
-## Extras
-
-* [ ] Soft Delete
-* [ ] Auditoría
-* [ ] Logs
-* [ ] Recordatorios por email
-* [ ] Recordatorios por WhatsApp
+## 🔮 Fase 6: Funcionalidades Futuras
+- [ ] Refresh Tokens.
+- [ ] Recordatorios automatizados por Email (Nodemailer).
+- [ ] Recordatorios automatizados por WhatsApp.
