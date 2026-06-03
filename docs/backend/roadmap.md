@@ -25,11 +25,11 @@
 ---
 
 ## 🚧 Fase 4: Refinamiento Backend (En progreso - "Camino A")
-- [ ] **Soft Delete:** Implementar borrado lógico en tablas clave (Usuarios, Profesionales, Turnos) mediante Prisma Extensions o Middleware para mantener la integridad histórica.
-- [ ] **Rate Limiting:** Implementar `ThrottlerModule` para proteger endpoints sensibles (como `/auth/login`) contra ataques de fuerza bruta.
-- [ ] **Seguridad HTTP:** Configurar `Helmet` para proteger las cabeceras HTTP.
-- [ ] **Paginación:** Agregar metadatos de paginación (`page`, `limit`, `total`) en los endpoints `findAll` de usuarios y turnos.
-- [ ] **Auditoría Básica / Logs:** Implementar un logger profesional (ej. Winston o Pino) para registrar acciones críticas (turnos cancelados, logins fallidos).
+- [x] **Soft Delete:** Implementar borrado lógico en tablas clave (Usuarios, Profesionales, Turnos) mediante Prisma Extensions o Middleware para mantener la integridad histórica.
+- [x] **Rate Limiting:** Implementar `ThrottlerModule` para proteger endpoints sensibles (como `/auth/login`) contra ataques de fuerza bruta.
+- [x] **Seguridad HTTP:** Configurar `Helmet` para proteger las cabeceras HTTP.
+- [x] **Paginación:** Agregar metadatos de paginación (`page`, `limit`, `total`) en los endpoints `findAll` de usuarios y turnos.
+- [x] **Auditoría Básica / Logs:** Implementar un logger profesional (ej. Winston o Pino) para registrar acciones críticas (turnos cancelados, logins fallidos).
 
 ---
 
