@@ -96,7 +96,7 @@
 
 * [x] CRUD básico
 
-* [ ] Buscar por DNI
+* [x] Buscar por DNI
 
 * [ ] Login
 

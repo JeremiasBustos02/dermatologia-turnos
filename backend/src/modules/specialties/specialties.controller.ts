@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
 import { SpecialtiesService } from './specialties.service';
 import { CreateSpecialtyDto } from './dto/create-specialty.dto';
 import { UpdateSpecialtyDto } from './dto/update-specialty.dto';
+import { FiltersSpecialtiesDto } from './dto/FiltersSpecialtiesDto';
 
 @Controller('specialties')
 export class SpecialtiesController {
@@ -13,8 +14,8 @@ export class SpecialtiesController {
   }
 
   @Get()
-  findAll() {
-    return this.specialtiesService.findAll();
+  findAll(@Query() filters: FiltersSpecialtiesDto) {
+    return this.specialtiesService.findAll(filters);
   }
 
   findOne(
