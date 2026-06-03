@@ -30,31 +30,49 @@ export class ProfessionalsService {
     });
   }
 
-  findAll(filters: FilterProfessionalsDto) {
-    return this.prisma.professional.findMany({
-      where: {
-        firstName: filters.firstName
-          ? {
-              contains: filters.firstName,
-              mode: 'insensitive',
-            }
-          : undefined,
+  async findAll(filters: FilterProfessionalsDto) {
+    const { page = 1, limit = 10, ...queryFilters } = filters;
+    const skip = (page - 1) * limit;
 
-        lastName: filters.lastName
-          ? {
-              contains: filters.lastName,
-              mode: 'insensitive',
-            }
-          : undefined,
+    const whereCondition = {
+      firstName: queryFilters.firstName
+        ? {
+            contains: queryFilters.firstName,
+            mode: 'insensitive' as const,
+          }
+        : undefined,
+      lastName: queryFilters.lastName
+        ? {
+            contains: queryFilters.lastName,
+            mode: 'insensitive' as const,
+          }
+        : undefined,
+      licenseNumber: queryFilters.licenseNumber,
+    };
 
-        licenseNumber: filters.licenseNumber,
+    const [total, data] = await this.prisma.$transaction([
+      this.prisma.professional.count({ where: whereCondition }),
+      this.prisma.professional.findMany({
+        where: whereCondition,
+        skip,
+        take: limit,
+        include: {
+          specialties: true,
+          coverages: true,
+        },
+      }),
+    ]);
+
+    const lastPage = Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        lastPage: lastPage === 0 ? 1 : lastPage,
       },
-
-      include: {
-        specialties: true,
-        coverages: true,
-      },
-    });
+    };
   }
 
   findOne(id: number) {

@@ -37,6 +37,10 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  deletedAt DateTime?
+
+  hashedRefreshToken String?
 }
 
 model Professional {
@@ -56,6 +60,8 @@ model Professional {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  deletedAt DateTime?
 }
 
 model Specialty {
@@ -66,6 +72,8 @@ model Specialty {
   description String?
 
   professionals Professional[]
+
+  deletedAt DateTime?
 }
 
 model Coverage {
@@ -76,6 +84,8 @@ model Coverage {
   professionals Professional[]
 
   appointments Appointment[]
+
+  deletedAt DateTime?
 }
 
 enum DayOfWeek {

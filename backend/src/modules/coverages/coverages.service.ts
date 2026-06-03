@@ -14,17 +14,38 @@ export class CoveragesService {
     });
   }
 
-  findAll(filters: FilterCoveragesDto) {
-    return this.prisma.coverage.findMany({
-      where: {
-        name: filters.name
-          ? {
-            contains: filters.name,
-            mode: 'insensitive',
+  async findAll(filters: FilterCoveragesDto) {
+    const { page = 1, limit = 10, ...queryFilters } = filters;
+    const skip = (page - 1) * limit;
+
+    const whereCondition = {
+      name: queryFilters.name
+        ? {
+            contains: queryFilters.name,
+            mode: 'insensitive' as const,
           }
-          : undefined,
+        : undefined,
+    };
+
+    const [total, data] = await this.prisma.$transaction([
+      this.prisma.coverage.count({ where: whereCondition }),
+      this.prisma.coverage.findMany({
+        where: whereCondition,
+        skip,
+        take: limit,
+      }),
+    ]);
+
+    const lastPage = Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        lastPage: lastPage === 0 ? 1 : lastPage,
       },
-    });
+    };
   }
 
   findOne(id: number) {

@@ -28,38 +28,51 @@ export class UsersService {
   }
 
   async findAll(filters: FilterUsersDto) {
-    return this.prisma.user.findMany({
-      where: {
-        dni: filters.dni,
-        email: filters.email,
-        role: filters.role,
+    const { page = 1, limit = 10, ...queryFilters } = filters;
 
-        firstName: filters.firstName
-          ? {
-            contains: filters.firstName,
-            mode: 'insensitive',
-          }
-          : undefined,
+    const skip = (page - 1) * limit;
 
-        lastName: filters.lastName
-          ? {
-            contains: filters.lastName,
-            mode: 'insensitive',
-          }
-          : undefined,
+    const whereCondition = {
+      dni: queryFilters.dni,
+      email: queryFilters.email,
+      role: queryFilters.role,
+      firstName: queryFilters.firstName
+        ? { contains: queryFilters.firstName, mode: 'insensitive' as const }
+        : undefined,
+      lastName: queryFilters.lastName
+        ? { contains: queryFilters.lastName, mode: 'insensitive' as const }
+        : undefined,
+    };
+
+    const [total, data] = await this.prisma.$transaction([
+      this.prisma.user.count({ where: whereCondition }),
+      this.prisma.user.findMany({
+        where: whereCondition,
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          dni: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+    ]);
+
+    const lastPage = Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        lastPage: lastPage === 0 ? 1 : lastPage,
       },
-
-      select: {
-        id: true,
-        dni: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    };
   }
 
   async findOne(id: number) {

@@ -40,18 +40,39 @@ export class SchedulesService {
     });
   }
 
-  findAll(filters: FilterSchedulesDto) {
-    return this.prisma.schedule.findMany({
-      where: {
-        professionalId: filters.professionalId,
-        dayOfWeek: filters.dayOfWeek,
-        startTime: filters.startTime,
-        endTime: filters.endTime,
+  async findAll(filters: FilterSchedulesDto) {
+    const { page = 1, limit = 10, ...queryFilters } = filters;
+    const skip = (page - 1) * limit;
+
+    const whereCondition = {
+      professionalId: queryFilters.professionalId,
+      dayOfWeek: queryFilters.dayOfWeek,
+      startTime: queryFilters.startTime,
+      endTime: queryFilters.endTime,
+    };
+
+    const [total, data] = await this.prisma.$transaction([
+      this.prisma.schedule.count({ where: whereCondition }),
+      this.prisma.schedule.findMany({
+        where: whereCondition,
+        skip,
+        take: limit,
+        include: {
+          professional: true,
+        },
+      }),
+    ]);
+
+    const lastPage = Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        lastPage: lastPage === 0 ? 1 : lastPage,
       },
-      include: {
-        professional: true,
-      },
-    });
+    };
   }
 
   async findOne(id: number) {
