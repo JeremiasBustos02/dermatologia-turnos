@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 
 import { UsersService } from './users.service';
@@ -14,7 +15,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
@@ -22,7 +23,11 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
+  findAll(@Query('dni') dni?: string) {
+    if (dni) {
+      return this.usersService.findByDni(dni);
+    }
+
     return this.usersService.findAll();
   }
 
