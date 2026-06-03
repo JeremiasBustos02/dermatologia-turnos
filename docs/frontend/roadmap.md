@@ -1,13 +1,13 @@
 # 🚀 Roadmap del Proyecto - Frontend
 
 ## Fase 1: Setup & Core
-- [ ] Inicialización con Vite + TS + Tailwind.
-- [ ] Configuración de ESLint y Prettier.
-- [ ] Configuración de Axios + Interceptores.
-- [ ] Implementación de `AuthStore` (Zustand).
+- [x] Inicialización con Vite + TS + Tailwind.
+- [x] Configuración de ESLint y Prettier.
+- [x] Configuración de Axios + Interceptores.
+- [x] Implementación de `AuthStore` (Zustand).
 
 ## Fase 2: Auth & Layout
-- [ ] Vistas de Login y Rutas Protegidas.
+- [x] Vistas de Login y Rutas Protegidas.
 - [ ] Layout principal (Sidebar, Header, Logout).
 
 ## Fase 3: Módulos Core
