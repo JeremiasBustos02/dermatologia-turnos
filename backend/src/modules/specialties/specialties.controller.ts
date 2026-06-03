@@ -1,22 +1,34 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
 import { SpecialtiesService } from './specialties.service';
 import { CreateSpecialtyDto } from './dto/create-specialty.dto';
 import { UpdateSpecialtyDto } from './dto/update-specialty.dto';
+import { FiltersSpecialtiesDto } from './dto/FiltersSpecialtiesDto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '@prisma/client';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth('access-token')
+@ApiTags('Specialties')
 @Controller('specialties')
 export class SpecialtiesController {
   constructor(private readonly specialtiesService: SpecialtiesService) { }
 
   @Post()
+  @Roles(UserRole.ADMIN)
   create(@Body() dto: CreateSpecialtyDto) {
     return this.specialtiesService.create(dto);
   }
 
   @Get()
-  findAll() {
-    return this.specialtiesService.findAll();
+  @Roles(UserRole.ADMIN)
+  findAll(@Query() filters: FiltersSpecialtiesDto) {
+    return this.specialtiesService.findAll(filters);
   }
 
+  @Get(':id')
+  @Roles(UserRole.ADMIN)
   findOne(
     @Param('id', ParseIntPipe) id: number,
   ) {
@@ -24,6 +36,7 @@ export class SpecialtiesController {
   }
 
   @Patch(':id')
+  @Roles(UserRole.ADMIN)
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateSpecialtyDto,
@@ -32,6 +45,7 @@ export class SpecialtiesController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.specialtiesService.remove(id);
   }

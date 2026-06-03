@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateSpecialtyDto } from './dto/create-specialty.dto';
 import { UpdateSpecialtyDto } from './dto/update-specialty.dto';
+import { FiltersSpecialtiesDto } from './dto/FiltersSpecialtiesDto';
 
 @Injectable()
 export class SpecialtiesService {
@@ -13,8 +14,13 @@ export class SpecialtiesService {
     });
   }
 
-  findAll() {
-    return this.prisma.specialty.findMany();
+  findAll(filters: FiltersSpecialtiesDto) {
+    return this.prisma.specialty.findMany({
+      where: {
+        name: filters.name,
+        description: filters.description,
+      },
+    });
   }
 
   findOne(id: number) {

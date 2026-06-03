@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCoverageDto } from './dto/create-coverage.dto';
 import { UpdateCoverageDto } from './dto/update-coverage.dto';
+import { FilterCoveragesDto } from './dto/FiltersCoveragesDto';
 
 @Injectable()
 export class CoveragesService {
@@ -13,8 +14,17 @@ export class CoveragesService {
     });
   }
 
-  findAll() {
-    return this.prisma.coverage.findMany();
+  findAll(filters: FilterCoveragesDto) {
+    return this.prisma.coverage.findMany({
+      where: {
+        name: filters.name
+          ? {
+            contains: filters.name,
+            mode: 'insensitive',
+          }
+          : undefined,
+      },
+    });
   }
 
   findOne(id: number) {

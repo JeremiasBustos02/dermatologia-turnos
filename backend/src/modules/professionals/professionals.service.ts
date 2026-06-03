@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
+import { FilterProfessionalsDto } from './dto/FilterProfessionalsDto';
 
 @Injectable()
 export class ProfessionalsService {
@@ -13,7 +14,6 @@ export class ProfessionalsService {
         firstName: dto.firstName,
         lastName: dto.lastName,
         licenseNumber: dto.licenseNumber,
-
         specialties: {
           connect: dto.specialtyIds.map(id => ({ id })),
         },
@@ -30,18 +30,40 @@ export class ProfessionalsService {
     });
   }
 
-  findAll() {
-  return this.prisma.professional.findMany({
-    include: {
-      specialties: true,
-      coverages: true,
-    },
-  });
-}
+  findAll(filters: FilterProfessionalsDto) {
+    return this.prisma.professional.findMany({
+      where: {
+        firstName: filters.firstName
+          ? {
+              contains: filters.firstName,
+              mode: 'insensitive',
+            }
+          : undefined,
+
+        lastName: filters.lastName
+          ? {
+              contains: filters.lastName,
+              mode: 'insensitive',
+            }
+          : undefined,
+
+        licenseNumber: filters.licenseNumber,
+      },
+
+      include: {
+        specialties: true,
+        coverages: true,
+      },
+    });
+  }
 
   findOne(id: number) {
     return this.prisma.professional.findUnique({
       where: { id },
+      include: {
+        specialties: true,
+        coverages: true,
+      },
     });
   }
 
@@ -49,12 +71,20 @@ export class ProfessionalsService {
     return this.prisma.professional.update({
       where: { id },
       data: updateProfessionalDto,
+      include: {
+        specialties: true,
+        coverages: true,
+      },
     });
   }
 
   remove(id: number) {
     return this.prisma.professional.delete({
       where: { id },
+      include: {
+        specialties: true,
+        coverages: true,
+      },
     });
   }
 }
