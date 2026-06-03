@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { SchedulesService } from './schedules.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
+import { FilterSchedulesDto } from './dto/FiltersSchedulesDto';
 
 @Controller('schedules')
 export class SchedulesController {
@@ -13,8 +14,8 @@ export class SchedulesController {
   }
 
   @Get()
-  findAll() {
-    return this.schedulesService.findAll();
+  findAll(@Query() filters: FilterSchedulesDto) {
+    return this.schedulesService.findAll(filters);
   }
 
   @Get(':id')

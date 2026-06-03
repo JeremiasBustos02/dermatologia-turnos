@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
+import { FilterProfessionalsDto } from './dto/FiltersAppointmentsDto';
 
 @Controller('appointments')
 export class AppointmentsController {
@@ -13,8 +14,8 @@ export class AppointmentsController {
   }
 
   @Get()
-  findAll() {
-    return this.appointmentsService.findAll();
+  findAll(@Query() filters: FilterProfessionalsDto) {
+    return this.appointmentsService.findAll(filters);
   }
 
   @Get(':id')

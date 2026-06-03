@@ -12,6 +12,7 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { FilterUsersDto } from './dto/FilterUsersDto';
 
 @Controller('users')
 export class UsersController {
@@ -23,12 +24,8 @@ export class UsersController {
   }
 
   @Get()
-  findAll(@Query('dni') dni?: string) {
-    if (dni) {
-      return this.usersService.findByDni(dni);
-    }
-
-    return this.usersService.findAll();
+  findAll(@Query() filters: FilterUsersDto) {
+    return this.usersService.findAll(filters);
   }
 
   @Get(':id')

@@ -6,6 +6,7 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
+import { FilterProfessionalsDto } from './dto/FiltersAppointmentsDto';
 
 @Injectable()
 export class AppointmentsService {
@@ -46,8 +47,22 @@ export class AppointmentsService {
     });
   }
 
-  findAll() {
+  async findAll(filters: FilterProfessionalsDto) {
     return this.prisma.appointment.findMany({
+      where: {
+        patientId: filters.patientId,
+        professionalId: filters.professionalId,
+        coverageId: filters.coverageId,
+        dateTime: filters.dateTime
+          ? new Date(filters.dateTime)
+          : undefined,
+        notes: filters.notes
+          ? {
+            contains: filters.notes,
+            mode: 'insensitive',
+          }
+          : undefined,
+      },
       include: {
         patient: true,
         professional: true,

@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { CoveragesService } from './coverages.service';
 import { CreateCoverageDto } from './dto/create-coverage.dto';
 import { UpdateCoverageDto } from './dto/update-coverage.dto';
+import { FilterCoveragesDto } from './dto/FiltersCoveragesDto';
 
 @Controller('coverages')
 export class CoveragesController {
@@ -13,8 +14,8 @@ export class CoveragesController {
   }
 
   @Get()
-  findAll() {
-    return this.coveragesService.findAll();
+  findAll(@Query() filters: FilterCoveragesDto) {
+    return this.coveragesService.findAll(filters);
   }
 
   @Get(':id')

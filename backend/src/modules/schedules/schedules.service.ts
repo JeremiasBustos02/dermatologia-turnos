@@ -2,6 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { FilterSchedulesDto } from './dto/FiltersSchedulesDto';
 
 @Injectable()
 export class SchedulesService {
@@ -31,8 +32,14 @@ export class SchedulesService {
     });
   }
 
-  findAll() {
+  findAll(filters: FilterSchedulesDto) {
     return this.prisma.schedule.findMany({
+      where: {
+        professionalId: filters.professionalId,
+        dayOfWeek: filters.dayOfWeek,
+        startTime: filters.startTime,
+        endTime: filters.endTime,
+      },
       include: {
         professional: true,
       },
