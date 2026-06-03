@@ -1,8 +1,4 @@
----
 
-`roadmap.md` 
-
-```markdown
 # Roadmap del Proyecto
 
 ## ✅ Fase 1: Infraestructura y Base (COMPLETADO)
