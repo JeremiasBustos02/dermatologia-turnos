@@ -65,15 +65,15 @@ export class AppointmentsService {
     if (queryFilters.dateFrom && queryFilters.dateTo) {
       dateFilter = {
         dateTime: {
-          gte: dayjs.tz(queryFilters.dateFrom).startOf('day').toDate(),
-          lte: dayjs.tz(queryFilters.dateTo).endOf('day').toDate(),
+          gte: dayjs.tz(queryFilters.dateFrom, 'America/Argentina/Buenos_Aires').startOf('day').toDate(),
+          lte: dayjs.tz(queryFilters.dateTo, 'America/Argentina/Buenos_Aires').endOf('day').toDate(),
         },
       };
     } else if (queryFilters.dateFrom) {
       dateFilter = {
         dateTime: {
-          gte: dayjs.tz(queryFilters.dateFrom).startOf('day').toDate(),
-          lte: dayjs.tz(queryFilters.dateFrom).endOf('day').toDate(),
+          gte: dayjs.tz(queryFilters.dateFrom, 'America/Argentina/Buenos_Aires').startOf('day').toDate(),
+          lte: dayjs.tz(queryFilters.dateFrom, 'America/Argentina/Buenos_Aires').endOf('day').toDate(),
         },
       };
     }
