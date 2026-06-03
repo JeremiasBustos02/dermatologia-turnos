@@ -115,4 +115,10 @@ export class UsersService {
 
     return user;
   }
+
+  async findByDniForAuth(dni: string) {
+    return this.prisma.user.findUnique({
+      where: { dni },
+    });
+  }
 }
