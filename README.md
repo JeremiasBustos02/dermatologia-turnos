@@ -4,26 +4,116 @@ API RESTful diseñada para la gestión integral de un consultorio médico, admin
 
 ## 🚀 Tecnologías
 
-* **Framework:** NestJS
-* **Lenguaje:** TypeScript
-* **Base de Datos:** PostgreSQL
-* **ORM:** Prisma
-* **Autenticación:** JWT (Passport)
-* **Fechas y Timezones:** Day.js
-* **Documentación:** Swagger (OpenAPI)
+- **Backend:** NestJS (TypeScript)
+- **Frontend:** React + Vite + TypeScript
+- **Base de Datos:** PostgreSQL
+- **ORM:** Prisma
+- **Autenticación:** JWT (Passport)
+- **Fechas y Timezones:** Day.js
+- **Documentación:** Swagger (OpenAPI)
+
+---
+
+## 📁 Estructura del proyecto
+
+```
+/backend   → API NestJS
+/frontend  → Aplicación React
+```
+
+---
+
+## ⚙️ Instalación y configuración
+
+### 1. Clonar el repositorio
+
+```bash
+git clone <tu-repo-url>
+cd <nombre-del-proyecto>
+```
+
+---
+
+### 2. Backend (API)
+
+```bash
+cd backend
+npm install
+```
+
+#### Configurar variables de entorno
+
+Crear un archivo `.env` en la carpeta `backend`:
+
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
+JWT_SECRET="tu_secreto"
+```
+
+#### Migraciones de base de datos (Prisma)
+
+```bash
+npx prisma migrate dev
+npx prisma generate
+```
+
+#### Levantar backend en desarrollo
+
+```bash
+npm run start:dev
+```
+
+Backend en:
+http://localhost:3000
+
+---
+
+### 3. Frontend (React)
+
+```bash
+cd frontend
+npm install
+```
+
+#### Variables de entorno (si aplica)
+
+Crear `.env` en `frontend`:
+
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+#### Levantar frontend en desarrollo
+
+```bash
+npm run dev
+```
+
+Frontend en:
+http://localhost:5173
+
+---
 
 ## ✨ Características Principales
 
-* **Autenticación y Autorización (RBAC):** Accesos protegidos por JWT y control de roles (`ADMIN`, `RECEPTIONIST`, `PATIENT`).
-* **Motor de Agendas:** Generación dinámica de franjas horarias disponibles según la configuración de días, horarios y duración de turnos de cada profesional.
-* **Manejo Global de Zonas Horarias:** Normalización de fechas a UTC en base de datos y cálculos precisos adaptados a la zona horaria del consultorio (Argentina), permitiendo interacciones desde cualquier huso horario sin desfases.
-* **Prevención de Conflictos:** Bloqueo algorítmico de turnos superpuestos y validación estricta de coberturas médicas aceptadas por el profesional.
-* **Manejo Centralizado de Errores:** Filtros de excepciones personalizados para capturar y traducir errores de base de datos a respuestas HTTP amigables.
+- Autenticación y Autorización (RBAC) con JWT (`ADMIN`, `RECEPTIONIST`, `PATIENT`)
+- Motor de agendas dinámico según disponibilidad de profesionales
+- Manejo de zonas horarias con normalización a UTC
+- Prevención de conflictos de turnos superpuestos
+- Validaciones estrictas de reglas de negocio
+- Manejo centralizado de errores con filtros globales
 
-## 🛠️ Instalación y Configuración
+---
 
-1. **Clonar el repositorio y descargar dependencias:**
-   ```bash
-   git clone <tu-repo-url>
-   cd backend
-   npm install
+## 🛠️ Scripts útiles
+
+### Backend
+- npm run start:dev → desarrollo
+- npm run build → producción
+- npm run start:prod → producción
+- npx prisma studio → visualizar DB
+
+### Frontend
+- npm run dev → desarrollo
+- npm run build → build producción
+- npm run preview → previsualización
