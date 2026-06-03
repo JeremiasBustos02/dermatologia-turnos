@@ -4,33 +4,41 @@ import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
 import { FilterProfessionalsDto } from './dto/FilterProfessionalsDto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
+import { RolesGuard } from '../auth/guards/roles-guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '@prisma/client';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('professionals')
 export class ProfessionalsController {
   constructor(private readonly professionalsService: ProfessionalsService) {}
 
   @Post()
+  @Roles(UserRole.ADMIN)
   create(@Body() createProfessionalDto: CreateProfessionalDto) {
     return this.professionalsService.create(createProfessionalDto);
   }
 
   @Get()
+  @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
   findAll(@Query() filters: FilterProfessionalsDto) {
     return this.professionalsService.findAll(filters);
   }
 
   @Get(':id')
+  @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
   findOne(@Param('id') id: string) {
     return this.professionalsService.findOne(+id);
   }
 
   @Patch(':id')
+  @Roles(UserRole.ADMIN)
   update(@Param('id') id: string, @Body() updateProfessionalDto: UpdateProfessionalDto) {
     return this.professionalsService.update(+id, updateProfessionalDto);
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN)
   remove(@Param('id') id: string) {
     return this.professionalsService.remove(+id);
   }
