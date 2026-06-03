@@ -6,7 +6,7 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
-import { FilterProfessionalsDto } from './dto/FiltersAppointmentsDto';
+import { FiltersAppointmentsDto } from './dto/FiltersAppointmentsDto';
 
 @Injectable()
 export class AppointmentsService {
@@ -47,7 +47,19 @@ export class AppointmentsService {
     });
   }
 
-  async findAll(filters: FilterProfessionalsDto) {
+  async findAll(filters: FiltersAppointmentsDto) {
+    let dateTime: Date | undefined;
+
+    if (filters.dateTime) {
+      dateTime = new Date(filters.dateTime);
+
+      if (isNaN(dateTime.getTime())) {
+        throw new BadRequestException(
+          'Fecha inválida.',
+        );
+      }
+    }
+
     return this.prisma.appointment.findMany({
       where: {
         patientId: filters.patientId,
@@ -94,6 +106,15 @@ export class AppointmentsService {
   async update(id: number, updateAppointmentDto: UpdateAppointmentDto) {
     const appointment = await this.findOne(id);
 
+    if (
+      appointment.status === 'COMPLETED' ||
+      appointment.status === 'CANCELLED'
+    ) {
+      throw new BadRequestException(
+        'No se puede modificar un turno finalizado.',
+      );
+    }
+
     const patientId =
       updateAppointmentDto.patientId ?? appointment.patientId;
 
@@ -133,12 +154,6 @@ export class AppointmentsService {
     return this.prisma.appointment.update({
       where: { id },
       data: updateAppointmentDto,
-    });
-  }
-
-  remove(id: number) {
-    return this.prisma.appointment.delete({
-      where: { id },
     });
   }
 
@@ -395,6 +410,8 @@ export class AppointmentsService {
         dayOfWeek,
       },
     });
+
+    await this.validateProfessional(professionalId);
 
     if (!schedules.length) {
       return [];

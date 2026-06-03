@@ -1,4 +1,4 @@
-export class FilterProfessionalsDto {
+export class FiltersAppointmentsDto {
     patientId?: number;
     professionalId?: number;
     coverageId?: number;
