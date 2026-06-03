@@ -41,6 +41,13 @@ export const Sidebar = ({ role, onLogout }: SidebarProps) => {
             <span>Pacientes</span>
           </NavLink>
         )}
+
+        {role === 'ADMIN' && (
+          <NavLink to="/professionals" className={navLinkClass}>
+            <Users size={20} />
+            <span>Profesionales</span>
+        </NavLink>
+        )}
       </nav>
 
       <div className="p-4 border-t border-slate-700">
