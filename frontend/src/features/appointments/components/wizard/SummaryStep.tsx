@@ -1,0 +1,83 @@
+import dayjs from 'dayjs';
+import 'dayjs/locale/es';
+import { CheckCircle, Calendar, User, Stethoscope, FileText } from 'lucide-react';
+import { usePatients } from '../../../patients/hooks/usePatients';
+import { useProfessionals } from '../../../professionals/hooks/useProfessionals';
+import type { NewAppointmentState } from '../../views/NewAppointmentPage';
+
+interface SummaryStepProps {
+  appointmentData: NewAppointmentState;
+  onConfirm: () => void;
+  isSubmitting: boolean;
+}
+
+export const SummaryStep = ({ appointmentData, onConfirm, isSubmitting }: SummaryStepProps) => {
+  const { data: patients = [] } = usePatients();
+  const { data: professionals = [] } = useProfessionals();
+
+  const patient = patients.find(p => p.id === appointmentData.patientId);
+  const professional = professionals.find(p => p.id === appointmentData.professionalId);
+
+  return (
+    <div className="space-y-6 max-w-2xl mx-auto">
+      <div className="text-center space-y-2 mb-8">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-blue-600 mb-2">
+          <CheckCircle size={32} />
+        </div>
+        <h2 className="text-2xl font-bold text-slate-800">Resumen del Turno</h2>
+        <p className="text-slate-500">Por favor, verifica que los datos sean correctos antes de confirmar.</p>
+      </div>
+
+      <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-4">
+        <div className="flex items-start gap-4 pb-4 border-b border-slate-200">
+          <User className="text-slate-400 mt-1" size={20} />
+          <div>
+            <p className="text-sm text-slate-500 font-medium">Paciente</p>
+            <p className="text-lg font-semibold text-slate-900">
+              {patient ? `${patient.firstName} ${patient.lastName}` : 'Cargando...'}
+            </p>
+            <p className="text-sm text-slate-500">DNI: {patient?.dni}</p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-4 pb-4 border-b border-slate-200">
+          <Stethoscope className="text-slate-400 mt-1" size={20} />
+          <div>
+            <p className="text-sm text-slate-500 font-medium">Profesional</p>
+            <p className="text-lg font-semibold text-slate-900">
+              {professional ? `${professional.firstName} ${professional.lastName}` : 'Cargando...'}
+            </p>
+            <p className="text-sm text-slate-500">Cobertura seleccionada (ID: {appointmentData.coverageId})</p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-4">
+          <Calendar className="text-slate-400 mt-1" size={20} />
+          <div>
+            <p className="text-sm text-slate-500 font-medium">Fecha y Hora</p>
+            <p className="text-lg font-semibold text-slate-900">
+              {dayjs(appointmentData.date).format('DD/MM/YYYY')} a las {appointmentData.time} hs.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-end pt-6">
+        <button 
+          onClick={onConfirm}
+          disabled={isSubmitting}
+          className="w-full sm:w-auto px-8 py-3 bg-emerald-600 text-white font-bold rounded-xl disabled:opacity-70 disabled:cursor-not-allowed hover:bg-emerald-700 transition-colors shadow-sm flex justify-center items-center gap-2"
+        >
+          {isSubmitting ? (
+            <>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              Guardando...
+            </>
+          ) : (
+            'Confirmar Turno'
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};
