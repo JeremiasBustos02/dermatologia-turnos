@@ -27,3 +27,10 @@ export const createAppointment = async (appointment: any) => {
   const { data } = await apiClient.post('/appointments', appointment);
   return data.data ?? data;
 };
+
+export const getProfessionalSchedules = async (professionalId: number) => {
+  const { data } = await apiClient.get('/schedules', {
+    params: { professionalId },
+  });
+  return data.data ?? data;
+};
