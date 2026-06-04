@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createAppointment, getAppointments } from "../services/appointments.api";
+import { createAppointment, getAppointments, getProfessionalSchedules } from "../services/appointments.api";
 import type { AppointmentFilters } from "../services/appointments.api";
 import { getAvailableSlots } from '../services/appointments.api';
 
@@ -23,8 +23,15 @@ export const useCreateAppointment = () => {
   return useMutation({
     mutationFn: createAppointment,
     onSuccess: () => {
-      // Invalida la caché para que el Dashboard se actualice solo
       queryClient.invalidateQueries({ queryKey: ['appointments'] }); 
     },
+  });
+};
+
+export const useProfessionalSchedules = (professionalId: number) => {
+  return useQuery({
+    queryKey: ['schedules', professionalId],
+    queryFn: () => getProfessionalSchedules(professionalId),
+    enabled: !!professionalId,
   });
 };
