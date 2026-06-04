@@ -15,6 +15,18 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) { }
 
+  @Get('available-slots')
+  @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
+  getAvailableSlots(
+    @Query('professionalId') professionalId: string,
+    @Query('date') date: string,
+  ) {
+    return this.appointmentsService.getAvailableSlots(
+      Number(professionalId),
+      date,
+    );
+  }
+
   @Post()
   @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
   create(@Body() createAppointmentDto: CreateAppointmentDto) {
@@ -55,17 +67,5 @@ export class AppointmentsController {
   @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
   completeAppointment(@Param('id', ParseIntPipe) id: number) {
     return this.appointmentsService.completeAppointment(id);
-  }
-
-  @Get('available-slots')
-  @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
-  getAvailableSlots(
-    @Query('professionalId') professionalId: string,
-    @Query('date') date: string,
-  ) {
-    return this.appointmentsService.getAvailableSlots(
-      Number(professionalId),
-      date,
-    );
   }
 }

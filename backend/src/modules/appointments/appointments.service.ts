@@ -416,9 +416,9 @@ export class AppointmentsService {
   }
 
   async getAvailableSlots(professionalId: number, date: string) {
-    const targetDate = new Date(date);
+    const localTargetDate = dayjs.tz(date, 'America/Argentina/Buenos_Aires');
 
-    if (isNaN(targetDate.getTime())) {
+    if (!localTargetDate.isValid()) {
       throw new BadRequestException('Fecha inválida.');
     }
 
@@ -432,8 +432,8 @@ export class AppointmentsService {
       'SATURDAY',
     ] as const;
 
-    const dayOfWeek = dayMap[targetDate.getDay()];
-
+    const dayOfWeek = dayMap[localTargetDate.day()];
+    
     const schedules = await this.prisma.schedule.findMany({
       where: {
         professionalId,
@@ -451,7 +451,6 @@ export class AppointmentsService {
       this.generateAvailableSlots(schedule),
     );
 
-    const localTargetDate = dayjs(targetDate).tz('America/Argentina/Buenos_Aires');
     const startOfDay = localTargetDate.startOf('day').toDate();
     const endOfDay = localTargetDate.endOf('day').toDate();
 
