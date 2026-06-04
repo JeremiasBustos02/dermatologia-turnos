@@ -7,6 +7,7 @@ import { ProfessionalsPage } from '../features/professionals/views/Professionals
 import { PatientsPage } from '../features/patients/views/PatientsPage';
 import { ProfessionalSchedulesPage } from '../features/schedules/views/ProfessionalSchedulesPage';
 import { NewAppointmentPage } from '../features/appointments/views/NewAppointmentPage';
+import { AppointmentsHistoryPage } from '../features/appointments/views/AppointmentsHistoryPage';
 
 export const AppRoutes = () => {
     return (
@@ -16,7 +17,7 @@ export const AppRoutes = () => {
             <Route element={<ProtectedRoute />}>
                 <Route element={<DashboardLayout />}>
                     <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/appointments" element={<div>Vista de Turnos</div>} />
+                    <Route path="/appointments" element={<AppointmentsHistoryPage />} />
                     <Route path="/appointments/new" element={<NewAppointmentPage />} />
                     <Route path="/patients" element={<PatientsPage />} />
                     <Route path="/professionals" element={<ProfessionalsPage />} />

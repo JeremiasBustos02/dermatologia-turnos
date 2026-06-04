@@ -9,23 +9,19 @@ import type { Appointment } from '../types';
 export const Dashboard = () => {
     const [date, setDate] = useState(dayjs().format('YYYY-MM-DD'));
 
-    // Lógica para capturar el cartel de éxito
     const location = useLocation();
     const navigate = useNavigate();
     const [toast, setToast] = useState<{ show: boolean; message: string }>({ show: false, message: '' });
 
     useEffect(() => {
-        // Si venimos de la página de creación y trae el flag de éxito...
         if (location.state?.showSuccessToast) {
             setToast({
                 show: true,
                 message: location.state.toastMessage || 'Operación realizada con éxito.'
             });
 
-            // Limpiamos el estado de la URL para que si el usuario recarga la página, el cartel no vuelva a salir
             navigate(location.pathname, { replace: true, state: {} });
 
-            // Desaparece automáticamente después de 5 segundos
             const timer = setTimeout(() => {
                 setToast({ show: false, message: '' });
             }, 5000);
