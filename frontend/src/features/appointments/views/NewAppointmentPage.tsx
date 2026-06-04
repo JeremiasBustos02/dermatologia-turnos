@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { PatientStep } from '../components/wizard/PatientStep';
 import { ProfessionalStep } from '../components/wizard/ProfessionalStep';
+import { DateTimeStep } from '../components/wizard/DateTimeStep';
 
 export interface NewAppointmentState {
   patientId?: number;
@@ -10,6 +11,7 @@ export interface NewAppointmentState {
   coverageId?: number;
   date?: string;
   time?: string;
+  dateTime?: string;
   notes?: string;
 }
 
@@ -76,7 +78,6 @@ export const NewAppointmentPage = () => {
       </div>
 
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm min-h-[400px]">
-        
         {currentStep === 1 && (
           <PatientStep 
             onNext={(patientId) => handleNext({ patientId })} 
@@ -92,9 +93,16 @@ export const NewAppointmentPage = () => {
           />
         )}
 
-        {currentStep === 3 && <div>(Pronto) Paso 3: Selector de Días y Horarios Libres</div>}
+        {currentStep === 3 && appointmentData.professionalId && (
+          <DateTimeStep 
+            professionalId={appointmentData.professionalId}
+            onNext={({ date, time, dateTime }) => handleNext({ date, time, dateTime })}
+            defaultDate={appointmentData.date}
+            defaultTime={appointmentData.time}
+          />
+        )}
+        
         {currentStep === 4 && <div>(Pronto) Paso 4: Resumen y Confirmación</div>}
-      
       </div>
     </div>
   );
