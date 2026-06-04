@@ -5,6 +5,7 @@ import { Dashboard } from '../features/appointments/views/Dashboard';
 import { Login } from '../features/auth/views/Login';
 import { ProfessionalsPage } from '../features/professionals/views/ProfessionalsPage';
 import { PatientsPage } from '../features/patients/views/PatientsPage';
+import { ProfessionalSchedulesPage } from '../features/schedules/views/ProfessionalSchedulesPage';
 
 export const AppRoutes = () => {
     return (
@@ -17,6 +18,7 @@ export const AppRoutes = () => {
                     <Route path="/appointments" element={<div>Vista de Turnos</div>} />
                     <Route path="/patients" element={<PatientsPage />} />
                     <Route path="/professionals" element={<ProfessionalsPage />} />
+                    <Route path="/professionals/:id/schedules" element={<ProfessionalSchedulesPage />} />
                     <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 </Route>
             </Route>

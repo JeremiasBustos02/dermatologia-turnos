@@ -1,75 +1,54 @@
 import { useState } from 'react';
-import { useAppointments } from '../hooks/useAppointments';
 import dayjs from 'dayjs';
+import { Plus, Calendar as CalendarIcon } from 'lucide-react';
+import { useAppointments } from '../hooks/useAppointments';
+import { AppointmentsDailyList } from '../components/AppointmentsDailyList';
+import type { Appointment } from '../types';
 
 export const Dashboard = () => {
   const [date, setDate] = useState(dayjs().format('YYYY-MM-DD'));
 
-  const { data: appointments = [], isLoading } = useAppointments({
-    dateFrom: date,
-  });
-
-  const statusColors: Record<string, string> = {
-    PENDING: 'bg-amber-100 text-amber-800',
-    CONFIRMED: 'bg-secondary-500 text-white',
-    COMPLETED: 'bg-slate-200 text-slate-600',
-    CANCELLED: 'bg-danger-600 text-white',
-  };
-
+  const { data: appointments = [], isLoading, isError } = useAppointments({ dateFrom: date });
+  
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Agenda del día</h2>
+    <div className="max-w-6xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+        
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-blue-100 text-blue-600 rounded-lg">
+            <CalendarIcon size={24} />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">Agenda del Día</h1>
+            <p className="text-slate-500 text-sm">Visualiza y gestiona los turnos diarios.</p>
+          </div>
+        </div>
 
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="p-2 border rounded-lg"
-        />
+        <div className="flex items-center gap-4 w-full sm:w-auto">
+          <input 
+            type="date" 
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 w-full sm:w-auto"
+          />
+          
+          <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap">
+            <Plus size={20} />
+            Nuevo Turno
+          </button>
+        </div>
       </div>
 
       {isLoading ? (
-        <p>Cargando turnos...</p>
-      ) : (
-        <div className="bg-surface rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b">
-              <tr>
-                <th className="p-4 text-left">Paciente</th>
-                <th className="p-4 text-left">Hora</th>
-                <th className="p-4 text-left">Estado</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {appointments.map((app: any) => (
-                <tr
-                  key={app.id}
-                  className="border-b last:border-0 hover:bg-slate-50"
-                >
-                  <td className="p-4">
-                    {app.patient.firstName} {app.patient.lastName}
-                  </td>
-
-                  <td className="p-4">
-                    {dayjs(app.dateTime).format('HH:mm')}
-                  </td>
-
-                  <td className="p-4">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        statusColors[app.status]
-                      }`}
-                    >
-                      {app.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="flex justify-center p-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
+      ) : isError ? (
+        <div className="bg-red-50 text-red-600 p-4 rounded-lg border border-red-200 text-center">
+          Ocurrió un error al cargar la agenda.
+        </div>
+      ) : (
+        <AppointmentsDailyList appointments={appointments as Appointment[]} />
       )}
     </div>
   );

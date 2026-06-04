@@ -52,7 +52,7 @@ export const Login = () => {
           placeholder="Contraseña"
           className="w-full p-3 mb-6 border rounded-md"
           value={password}
-          onChange={(e) => setPassword(password)}
+          onChange={(e) => setPassword(e.target.value)}
         />
 
         <button className="w-full bg-primary-600 text-white p-3 rounded-lg hover:bg-blue-700">
