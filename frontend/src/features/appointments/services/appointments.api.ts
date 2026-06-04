@@ -1,4 +1,4 @@
-import { apiClient } from '../../../config/axios';
+import { apiClient } from '../../../api/apiClient';
 
 export type AppointmentFilters = {
   dateFrom?: string;
