@@ -6,6 +6,7 @@ import { Login } from '../features/auth/views/Login';
 import { ProfessionalsPage } from '../features/professionals/views/ProfessionalsPage';
 import { PatientsPage } from '../features/patients/views/PatientsPage';
 import { ProfessionalSchedulesPage } from '../features/schedules/views/ProfessionalSchedulesPage';
+import { NewAppointmentPage } from '../features/appointments/views/NewAppointmentPage';
 
 export const AppRoutes = () => {
     return (
@@ -16,6 +17,7 @@ export const AppRoutes = () => {
                 <Route element={<DashboardLayout />}>
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/appointments" element={<div>Vista de Turnos</div>} />
+                    <Route path="/appointments/new" element={<NewAppointmentPage />} />
                     <Route path="/patients" element={<PatientsPage />} />
                     <Route path="/professionals" element={<ProfessionalsPage />} />
                     <Route path="/professionals/:id/schedules" element={<ProfessionalSchedulesPage />} />
