@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { PatientStep } from '../components/wizard/PatientStep';
+import { ProfessionalStep } from '../components/wizard/ProfessionalStep';
 
 export interface NewAppointmentState {
   patientId?: number;
@@ -75,15 +76,25 @@ export const NewAppointmentPage = () => {
       </div>
 
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm min-h-[400px]">
+        
         {currentStep === 1 && (
           <PatientStep 
             onNext={(patientId) => handleNext({ patientId })} 
             defaultSelected={appointmentData.patientId}
           />
         )}
-        {currentStep === 2 && <div>(Pronto) Paso 2: Seleccionar Profesional</div>}
+        
+        {currentStep === 2 && (
+          <ProfessionalStep 
+            onNext={({ professionalId, coverageId }) => handleNext({ professionalId, coverageId })}
+            defaultProfessionalId={appointmentData.professionalId}
+            defaultCoverageId={appointmentData.coverageId}
+          />
+        )}
+
         {currentStep === 3 && <div>(Pronto) Paso 3: Selector de Días y Horarios Libres</div>}
         {currentStep === 4 && <div>(Pronto) Paso 4: Resumen y Confirmación</div>}
+      
       </div>
     </div>
   );
