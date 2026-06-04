@@ -1,8 +1,8 @@
 import dayjs from 'dayjs';
-import { CheckCircle, XCircle, Clock, CalendarDays } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { CheckCircle, XCircle, CalendarCheck, Clock, CalendarDays } from 'lucide-react';import { useNavigate } from 'react-router-dom';
 import type { Appointment } from '../types';
 import { UI } from '../../../layouts/ui/styles';
+import { useUpdateAppointmentStatus } from '../hooks/useAppointments';
 
 interface AppointmentsDailyListProps {
   appointments: Appointment[];
@@ -25,6 +25,16 @@ const statusTranslations = {
 
 export const AppointmentsDailyList = ({ appointments, isLoading }: AppointmentsDailyListProps) => {
   const navigate = useNavigate();
+  const updateStatusMutation = useUpdateAppointmentStatus();
+
+  const handleUpdateStatus = (id: number, newStatus: 'CONFIRMED' | 'COMPLETED' | 'CANCELLED') => {
+    if (newStatus === 'CANCELLED') {
+      const confirm = window.confirm('¿Estás seguro de que deseas cancelar este turno?');
+      if (!confirm) return;
+    }
+    
+    updateStatusMutation.mutate({ id, status: newStatus });
+  };
 
   if (isLoading) {
     return (
@@ -112,14 +122,28 @@ export const AppointmentsDailyList = ({ appointments, isLoading }: AppointmentsD
                 <td className={`${UI.table.td} text-right`}>
                   <div className="flex justify-end gap-1.5">
                     <button 
-                      className={`${UI.button.icon} text-slate-400 bg-white hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 border-slate-200`} 
-                      title="Confirmar"
+                      onClick={() => handleUpdateStatus(appointment.id, 'CONFIRMED')}
+                      disabled={appointment.status === 'CONFIRMED' || appointment.status === 'COMPLETED' || appointment.status === 'CANCELLED' || updateStatusMutation.isPending}
+                      className={`${UI.button.icon} text-slate-400 bg-white hover:text-blue-600 hover:bg-blue-50 hover:border-blue-200 border-slate-200 disabled:opacity-30 disabled:cursor-not-allowed`} 
+                      title="Confirmar Asistencia"
+                    >
+                      <CalendarCheck size={16} />
+                    </button>
+
+                    <button 
+                      onClick={() => handleUpdateStatus(appointment.id, 'COMPLETED')}
+                      disabled={appointment.status === 'COMPLETED' || appointment.status === 'CANCELLED' || updateStatusMutation.isPending}
+                      className={`${UI.button.icon} text-slate-400 bg-white hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 border-slate-200 disabled:opacity-30 disabled:cursor-not-allowed`} 
+                      title="Marcar como Atendido (Completado)"
                     >
                       <CheckCircle size={16} />
                     </button>
+                    
                     <button 
-                      className={`${UI.button.icon} text-slate-400 bg-white hover:text-red-600 hover:bg-red-50 hover:border-red-200 border-slate-200`} 
-                      title="Cancelar"
+                      onClick={() => handleUpdateStatus(appointment.id, 'CANCELLED')}
+                      disabled={appointment.status === 'COMPLETED' || appointment.status === 'CANCELLED' || updateStatusMutation.isPending}
+                      className={`${UI.button.icon} text-slate-400 bg-white hover:text-red-600 hover:bg-red-50 hover:border-red-200 border-slate-200 disabled:opacity-30 disabled:cursor-not-allowed`} 
+                      title="Cancelar Turno"
                     >
                       <XCircle size={16} />
                     </button>

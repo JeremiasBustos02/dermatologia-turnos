@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createAppointment, getAppointments, getProfessionalSchedules } from "../services/appointments.api";
+import { createAppointment, getAppointments, getProfessionalSchedules, updateAppointmentStatus } from "../services/appointments.api";
 import type { AppointmentFilters } from "../services/appointments.api";
 import { getAvailableSlots } from '../services/appointments.api';
 
@@ -33,5 +33,20 @@ export const useProfessionalSchedules = (professionalId: number) => {
     queryKey: ['schedules', professionalId],
     queryFn: () => getProfessionalSchedules(professionalId),
     enabled: !!professionalId,
+  });
+};
+
+export const useUpdateAppointmentStatus = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: updateAppointmentStatus,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+    },
+    onError: (error: any) => {
+      console.error("Detalle del error al actualizar:", error.response?.data || error.message);
+      alert(`Error del servidor: ${error.response?.data?.message || 'Revisa la consola'}`);
+    }
   });
 };

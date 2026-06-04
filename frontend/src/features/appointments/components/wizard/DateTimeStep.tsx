@@ -20,8 +20,8 @@ export const DateTimeStep = ({ professionalId, onNext, defaultDate, defaultTime 
 
     const { data: schedules = [] } = useProfessionalSchedules(professionalId);
 
-    console.log("Horarios reales del backend:", schedules); // <-- Agrega esto
-    
+    console.log("Horarios reales del backend:", schedules);
+
     const dayMap: Record<string, number> = {
         SUNDAY: 0,
         MONDAY: 1,
@@ -57,7 +57,6 @@ export const DateTimeStep = ({ professionalId, onNext, defaultDate, defaultTime 
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
-                {/* COLUMNA IZQUIERDA: Selector de Fecha Personalizado */}
                 <div className="md:col-span-1 space-y-4">
                     <label className="block text-sm font-bold text-slate-700">Día del turno</label>
 
@@ -96,21 +95,33 @@ export const DateTimeStep = ({ professionalId, onNext, defaultDate, defaultTime 
                             </div>
                         ) : (
                             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                                {slots.map((slot) => {
-                                    const isSelected = selectedTime === slot;
-                                    return (
-                                        <button
-                                            key={slot}
-                                            onClick={() => setSelectedTime(slot)}
-                                            className={`py-2 px-3 rounded-lg font-medium text-sm transition-all border ${isSelected
-                                                ? 'bg-blue-600 text-white border-blue-600 shadow-md transform scale-105'
-                                                : 'bg-white text-slate-700 border-slate-200 hover:border-blue-300 hover:text-blue-600 shadow-sm'
-                                                }`}
-                                        >
-                                            {slot}
-                                        </button>
-                                    );
-                                })}
+                                {slots
+                                    .filter((slot) => {
+                                        const isToday = selectedDate === dayjs().format('YYYY-MM-DD');
+                                        if (!isToday) return true; // Si es un día futuro, mostramos todos los horarios
+
+                                        // Si es hoy, separamos la hora y los minutos del slot (ej: "09:00")
+                                        const [hours, minutes] = slot.split(':').map(Number);
+                                        const slotDateTime = dayjs().hour(hours).minute(minutes).second(0);
+
+                                        // 🌟 Solo dejamos pasar los horarios que sean posteriores a la hora actual exacta
+                                        return slotDateTime.isAfter(dayjs());
+                                    })
+                                    .map((slot) => {
+                                        const isSelected = selectedTime === slot;
+                                        return (
+                                            <button
+                                                key={slot}
+                                                onClick={() => setSelectedTime(slot)}
+                                                className={`py-2 px-3 rounded-lg font-medium text-sm transition-all border ${isSelected
+                                                    ? 'bg-blue-600 text-white border-blue-600 shadow-md transform scale-105'
+                                                    : 'bg-white text-slate-700 border-slate-200 hover:border-blue-300 hover:text-blue-600 shadow-sm'
+                                                    }`}
+                                            >
+                                                {slot}
+                                            </button>
+                                        );
+                                    })}
                             </div>
                         )}
                     </div>

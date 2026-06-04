@@ -433,7 +433,7 @@ export class AppointmentsService {
     ] as const;
 
     const dayOfWeek = dayMap[localTargetDate.day()];
-    
+
     const schedules = await this.prisma.schedule.findMany({
       where: {
         professionalId,
@@ -475,9 +475,22 @@ export class AppointmentsService {
       (slot) => !takenSlots.includes(slot),
     );
 
-    return availableSlots;
-  }
+    const now = dayjs().tz('America/Argentina/Buenos_Aires');
 
+    const isToday = localTargetDate.format('YYYY-MM-DD') === now.format('YYYY-MM-DD');
+
+    const validFutureSlots = availableSlots.filter((slot) => {
+      if (!isToday) return true;
+
+      const [hour, minute] = slot.split(':').map(Number);
+
+      const slotTime = localTargetDate.hour(hour).minute(minute);
+
+      return slotTime.isAfter(now);
+    });
+
+    return validFutureSlots;
+  }
   async confirmAppointment(id: number) {
     const appointment = await this.findOne(id);
 

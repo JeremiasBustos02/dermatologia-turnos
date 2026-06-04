@@ -34,3 +34,19 @@ export const getProfessionalSchedules = async (professionalId: number) => {
   });
   return data.data ?? data;
 };
+
+export const updateAppointmentStatus = async ({ id, status }: { id: number, status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' }) => {
+  let endpoint = `/appointments/${id}`; 
+  
+  if (status === 'COMPLETED') {
+    endpoint = `/appointments/${id}/complete`;
+  } else if (status === 'CANCELLED') {
+    endpoint = `/appointments/${id}/cancel`;
+  } else if (status === 'CONFIRMED') {
+    endpoint = `/appointments/${id}/confirm`;
+  }
+
+  const { data } = await apiClient.patch(endpoint);
+  
+  return data.data ?? data;
+};
