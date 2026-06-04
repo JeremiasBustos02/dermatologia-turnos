@@ -97,4 +97,31 @@ export class AuthService {
         });
         return { message: 'Sesión cerrada correctamente' };
     }
+
+    async getMe(userId: number) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                dni: true,
+                email: true,
+                role: true,
+            },
+        });
+
+        if (!user) {
+            throw new UnauthorizedException('Usuario no encontrado');
+        }
+
+        return {
+            userId: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            dni: user.dni,
+            email: user.email,
+            role: user.role,
+        };
+    }
 }

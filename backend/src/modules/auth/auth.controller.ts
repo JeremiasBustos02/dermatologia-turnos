@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Get, UseGuards, Request, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto'; // <- Importar el DTO
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtAuthGuard } from './guards/jwt-auth-guard';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtService } from '@nestjs/jwt';
@@ -11,8 +11,8 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly jwtService: JwtService, // <- Inyectar JwtService
-  ) {}
+    private readonly jwtService: JwtService,
+  ) { }
 
   @Post('login')
   @ApiOperation({ summary: 'Iniciar sesión' })
@@ -28,7 +28,7 @@ export class AuthController {
       const payload = await this.jwtService.verifyAsync(body.refreshToken, {
         secret: process.env.JWT_REFRESH_SECRET,
       });
-      
+
       return this.authService.refreshTokens(payload.sub, body.refreshToken);
     } catch (e) {
       throw new UnauthorizedException('Refresh token inválido o expirado');
@@ -40,15 +40,13 @@ export class AuthController {
   @Post('logout')
   @ApiOperation({ summary: 'Cerrar sesión y revocar tokens' })
   logout(@Request() req) {
-    // req.user viene del payload del access token gracias al JwtAuthGuard
     return this.authService.logout(req.user.userId);
   }
 
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('access-token')
   @Get('me')
-  @ApiOperation({ summary: 'Obtener datos del usuario logueado' })
+  @ApiBearerAuth('access-token')
   getProfile(@Request() req) {
-    return req.user;
+    return this.authService.getMe(req.user.userId);
   }
 }
