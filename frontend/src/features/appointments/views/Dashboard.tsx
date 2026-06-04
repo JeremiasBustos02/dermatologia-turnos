@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom'; // <-- Agregamos useLocation y useNavigate
-import dayjs from 'dayjs';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Plus, Calendar as CalendarIcon, CheckCircle, X } from 'lucide-react';
 import { useAppointments } from '../hooks/useAppointments';
 import { AppointmentsDailyList } from '../components/AppointmentsDailyList';
 import type { Appointment } from '../types';
 import { DashboardStats } from '../components/DashboardStats';
+import dayjs from 'dayjs';
+import { DatePicker } from '../../../components/ui/data-picker';
 
 export const Dashboard = () => {
-    const [date, setDate] = useState(dayjs().format('YYYY-MM-DD'));
-
+const [date, setDate] = useState<Date | undefined>(new Date());
     const location = useLocation();
     const navigate = useNavigate();
     const [toast, setToast] = useState<{ show: boolean; message: string }>({ show: false, message: '' });
@@ -31,7 +31,10 @@ export const Dashboard = () => {
         }
     }, [location, navigate]);
 
-    const { data: appointments = [], isLoading, isError } = useAppointments({ dateFrom: date });
+    const formattedDate = date ? dayjs(date).format('YYYY-MM-DD') : undefined;
+
+    const { data: appointments = [], isLoading, isError } =
+        useAppointments({ dateFrom: formattedDate });
 
     return (
         <div className="max-w-6xl mx-auto space-y-6 relative">
@@ -68,12 +71,7 @@ export const Dashboard = () => {
                 </div>
 
                 <div className="flex items-center gap-4 w-full sm:w-auto">
-                    <input
-                        type="date"
-                        value={date}
-                        onChange={(e) => setDate(e.target.value)}
-                        className="px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 w-full sm:w-auto"
-                    />
+                    <DatePicker date={date} setDate={setDate} />
 
                     <button
                         onClick={() => navigate('/appointments/new')}
