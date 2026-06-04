@@ -2,13 +2,15 @@ import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { ProfessionalsTable } from '../components/ProfessionalsTable';
 import { ProfessionalModal } from '../components/ProfessionalModal';
-import { useProfessionals, useDeleteProfessional, useCreateProfessional } from '../hooks/useProfessionals';
+// 👇 AGREGAMOS useUpdateProfessional a la importación
+import { useProfessionals, useDeleteProfessional, useCreateProfessional, useUpdateProfessional } from '../hooks/useProfessionals';
 import type { Professional, CreateProfessionalDTO } from '../../../types/index';
 
 export const ProfessionalsPage = () => {
   const { data: professionals = [], isLoading, isError } = useProfessionals();
   const deleteMutation = useDeleteProfessional();
   const createMutation = useCreateProfessional(); 
+  const updateMutation = useUpdateProfessional();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [professionalToEdit, setProfessionalToEdit] = useState<Professional | null>(null);
@@ -30,9 +32,17 @@ export const ProfessionalsPage = () => {
   };
 
   const handleFormSubmit = (data: CreateProfessionalDTO) => {
-    if (professionalToEdit) {
-      console.log('Actualizando profesional...', professionalToEdit.id, data);
-    } else {
+  if (professionalToEdit) {
+    updateMutation.mutate(
+      { id: professionalToEdit.id, data },
+      { 
+        onSuccess: () => {
+          setIsModalOpen(false);
+          setProfessionalToEdit(null);
+        } 
+      }
+    );
+  } else {
       createMutation.mutate(data, {
         onSuccess: () => {
           setIsModalOpen(false); 

@@ -7,15 +7,15 @@ export const getPatients = async (): Promise<Patient[]> => {
 };
 
 export const createPatient = async (patient: CreatePatientDTO): Promise<Patient> => {
-  const { data } = await apiClient.post('/patients', patient);
+  const { data } = await apiClient.post('/users', { ...patient, role: 'PATIENT' });
   return data.data ?? data;
 };
 
 export const updatePatient = async (id: number, patient: Partial<CreatePatientDTO>): Promise<Patient> => {
-  const { data } = await apiClient.patch(`/patients/${id}`, patient);
+  const { data } = await apiClient.patch(`/users/${id}`, patient);
   return data.data ?? data;
 };
 
 export const deletePatient = async (id: number): Promise<void> => {
-  await apiClient.delete(`/patients/${id}`);
+  await apiClient.delete(`/users/${id}`);
 };

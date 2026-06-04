@@ -14,3 +14,8 @@ export const createProfessional = async (professional: CreateProfessionalDTO): P
 export const deleteProfessional = async (id: number): Promise<void> => {
   await apiClient.delete(`/professionals/${id}`);
 };
+
+export const updateProfessional = async ({ id, data }: { id: number; data: Partial<CreateProfessionalDTO> }): Promise<Professional> => {
+  const { data: responseData } = await apiClient.patch(`/professionals/${id}`, data);
+  return responseData.data ?? responseData;
+};
