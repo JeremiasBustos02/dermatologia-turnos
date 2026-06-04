@@ -5,6 +5,7 @@ import { Plus, Calendar as CalendarIcon, CheckCircle, X } from 'lucide-react';
 import { useAppointments } from '../hooks/useAppointments';
 import { AppointmentsDailyList } from '../components/AppointmentsDailyList';
 import type { Appointment } from '../types';
+import { DashboardStats } from '../components/DashboardStats';
 
 export const Dashboard = () => {
     const [date, setDate] = useState(dayjs().format('YYYY-MM-DD'));
@@ -83,6 +84,10 @@ export const Dashboard = () => {
                     </button>
                 </div>
             </div>
+
+            {!isLoading && !isError && (
+                <DashboardStats appointments={appointments as Appointment[]} />
+            )}
 
             {isLoading ? (
                 <div className="flex justify-center p-12">
