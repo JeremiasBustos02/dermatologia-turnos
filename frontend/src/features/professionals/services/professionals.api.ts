@@ -1,4 +1,4 @@
-import { apiClient } from '../../../config/axios';
+import { apiClient } from '../../../api/apiClient';
 import type { Professional, CreateProfessionalDTO } from '../../../types/index';
 
 export const getProfessionals = async (): Promise<Professional[]> => {

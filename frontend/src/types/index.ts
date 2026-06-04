@@ -25,6 +25,21 @@ export interface CreateProfessionalDTO {
   licenseNumber: string;
 }
 
+export interface Patient {
+  id: number;
+  dni: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+export interface CreatePatientDTO {
+  dni: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 export interface Specialty {
   id: number;
   name: string;

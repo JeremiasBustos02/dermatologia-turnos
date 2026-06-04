@@ -1,10 +1,9 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
-import { useAuthStore } from '../store/AuthStore'; 
+import { useAuthStore } from '../auth/auth.store';
 
 export const DashboardLayout = () => {
-  // Conexión con Zustand (Componente Smart)
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
