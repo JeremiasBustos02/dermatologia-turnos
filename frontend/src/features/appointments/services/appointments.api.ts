@@ -22,3 +22,8 @@ export const getAvailableSlots = async (professionalId: number, date: string): P
   });
   return data.data ?? data;
 };
+
+export const createAppointment = async (appointment: any) => {
+  const { data } = await apiClient.post('/appointments', appointment);
+  return data.data ?? data;
+};

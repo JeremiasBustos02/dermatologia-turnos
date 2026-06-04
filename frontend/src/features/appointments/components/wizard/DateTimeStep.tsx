@@ -24,7 +24,7 @@ export const DateTimeStep = ({ professionalId, onNext, defaultDate, defaultTime 
 
   const handleContinue = () => {
     if (selectedDate && selectedTime) {
-      const dateTimeISO = dayjs(`${selectedDate}T${selectedTime}:00`).toISOString();
+      const dateTimeISO = dayjs(`${selectedDate}T${selectedTime}:00-03:00`).toISOString();
       onNext({ date: selectedDate, time: selectedTime, dateTime: dateTimeISO });
     }
   };
