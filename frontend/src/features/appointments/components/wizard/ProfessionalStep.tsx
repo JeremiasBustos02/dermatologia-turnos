@@ -24,7 +24,8 @@ export const ProfessionalStep = ({ onNext, defaultProfessionalId, defaultCoverag
   const filteredProfessionals = professionals.filter(p => 
     p.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.licenseNumber!.toLowerCase().includes(searchTerm.toLowerCase())
+    p.licenseNumber!.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.specialties.some(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   if (isLoading) return <div className="p-8 text-center text-slate-500">Cargando profesionales...</div>;
@@ -71,6 +72,7 @@ export const ProfessionalStep = ({ onNext, defaultProfessionalId, defaultCoverag
                         {prof.firstName} {prof.lastName}
                       </p>
                       <p className="text-sm text-slate-500">Matrícula: {prof.licenseNumber}</p>
+                      <p className="text-sm text-slate-500">{prof.specialties.map(s => s.name).join(', ')}</p>
                     </div>
                   </div>
                 </label>

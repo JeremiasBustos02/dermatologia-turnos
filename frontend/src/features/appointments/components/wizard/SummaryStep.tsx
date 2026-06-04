@@ -17,6 +17,7 @@ export const SummaryStep = ({ appointmentData, onConfirm, isSubmitting }: Summar
 
   const patient = patients.find(p => p.id === appointmentData.patientId);
   const professional = professionals.find(p => p.id === appointmentData.professionalId);
+  const coverageName = professional?.coverages.find(c => c.id === appointmentData.coverageId)?.name || 'N/A';   
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
@@ -47,7 +48,7 @@ export const SummaryStep = ({ appointmentData, onConfirm, isSubmitting }: Summar
             <p className="text-lg font-semibold text-slate-900">
               {professional ? `${professional.firstName} ${professional.lastName}` : 'Cargando...'}
             </p>
-            <p className="text-sm text-slate-500">Cobertura seleccionada (ID: {appointmentData.coverageId})</p>
+            <p className="text-sm text-slate-500">Cobertura seleccionada: {coverageName}</p>
           </div>
         </div>
 

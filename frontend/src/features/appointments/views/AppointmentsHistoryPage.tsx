@@ -106,7 +106,6 @@ export const AppointmentsHistoryPage = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
-                        {/* Aquí a futuro puedes conectar mutaciones para cambiar estados */}
                         <button className="p-2 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-emerald-50" title="Marcar Completado">
                           <CheckCircle size={18} />
                         </button>
