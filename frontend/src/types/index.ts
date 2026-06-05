@@ -23,6 +23,8 @@ export interface CreateProfessionalDTO {
   firstName: string;
   lastName: string;
   licenseNumber: string;
+  specialtyIds: [];
+  coverageIds: [];
 }
 
 export interface Patient {

@@ -4,13 +4,20 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { FilterUsersDto } from './dto/FilterUsersDto';
+import { UserRole } from '@prisma/client/index-browser';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) { }
 
   async create(dto: CreateUserDto) {
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    let password = dto.password;
+
+    if (!password && dto.role === UserRole.PATIENT) {
+      password = dto.dni;
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     return this.prisma.user.create({
       data: {
@@ -23,7 +30,8 @@ export class UsersService {
         firstName: true,
         lastName: true,
         email: true,
-        role: true,}
+        role: true,
+      }
     });
   }
 

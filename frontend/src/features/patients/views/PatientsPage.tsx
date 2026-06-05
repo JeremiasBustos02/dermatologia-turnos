@@ -37,7 +37,12 @@ export const PatientsPage = () => {
         { onSuccess: () => setIsModalOpen(false) }
       );
     } else {
-      createMutation.mutate(data, {
+      const completeData = {
+        ...data,
+        role: 'PATIENT' as const
+      };
+
+      createMutation.mutate(completeData, {
         onSuccess: () => setIsModalOpen(false)
       });
     }

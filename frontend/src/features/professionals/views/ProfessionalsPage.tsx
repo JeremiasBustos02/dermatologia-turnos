@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { ProfessionalsTable } from '../components/ProfessionalsTable';
 import { ProfessionalModal } from '../components/ProfessionalModal';
-// 👇 AGREGAMOS useUpdateProfessional a la importación
 import { useProfessionals, useDeleteProfessional, useCreateProfessional, useUpdateProfessional } from '../hooks/useProfessionals';
 import type { Professional, CreateProfessionalDTO } from '../../../types/index';
 
@@ -43,13 +42,21 @@ export const ProfessionalsPage = () => {
       }
     );
   } else {
-      createMutation.mutate(data, {
-        onSuccess: () => {
-          setIsModalOpen(false); 
-        }
-      });
-    }
-  };
+    const sanitizedData = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      licenseNumber: data.licenseNumber || undefined,
+      specialtyIds: Array.isArray(data.specialtyIds) ? data.specialtyIds.map(Number) : [],
+      coverageIds: Array.isArray(data.coverageIds) ? data.coverageIds.map(Number) : []
+    };
+
+    createMutation.mutate(sanitizedData as any, {
+      onSuccess: () => {
+        setIsModalOpen(false); 
+      }
+    });
+  }
+};
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 relative">
