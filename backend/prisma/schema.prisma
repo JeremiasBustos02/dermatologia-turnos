@@ -3,8 +3,85 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                 Int           @id @default(autoincrement())
+  dni                String        @unique
+  firstName          String
+  lastName           String
+  email              String?       @unique
+  password           String
+  role               UserRole
+  coverageId         Int?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  deletedAt          DateTime?
+  hashedRefreshToken String?
+  appointments       Appointment[] @relation("PatientAppointments")
+  coverage           Coverage?     @relation(fields: [coverageId], references: [id])
+}
+
+model Professional {
+  id            Int           @id @default(autoincrement())
+  firstName     String
+  lastName      String
+  licenseNumber String?       @unique
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
+  appointments  Appointment[] @relation("ProfessionalAppointments")
+  schedules     Schedule[]
+  coverages     Coverage[]    @relation("CoverageToProfessional")
+  specialties   Specialty[]   @relation("ProfessionalToSpecialty")
+}
+
+model Specialty {
+  id            Int            @id @default(autoincrement())
+  name          String         @unique
+  description   String?
+  deletedAt     DateTime?
+  professionals Professional[] @relation("ProfessionalToSpecialty")
+}
+
+model Coverage {
+  id            Int            @id @default(autoincrement())
+  name          String         @unique
+  description   String?
+  deletedAt     DateTime?
+  appointments  Appointment[]
+  users         User[]
+  professionals Professional[] @relation("CoverageToProfessional")
+}
+
+model Schedule {
+  id                  Int          @id @default(autoincrement())
+  professionalId      Int
+  dayOfWeek           DayOfWeek
+  startTime           String
+  endTime             String
+  appointmentDuration Int
+  professional        Professional @relation(fields: [professionalId], references: [id])
+}
+
+model Appointment {
+  id             Int               @id @default(autoincrement())
+  patientId      Int
+  professionalId Int
+  coverageId     Int
+  dateTime       DateTime
+  status         AppointmentStatus @default(PENDING)
+  notes          String?
+  createdAt      DateTime          @default(now())
+  coverage       Coverage          @relation(fields: [coverageId], references: [id])
+  patient        User              @relation("PatientAppointments", fields: [patientId], references: [id])
+  professional   Professional      @relation("ProfessionalAppointments", fields: [professionalId], references: [id])
+
+  @@index([professionalId, dateTime])
+  @@index([patientId])
 }
 
 enum UserRole {
@@ -20,80 +97,6 @@ enum AppointmentStatus {
   COMPLETED
 }
 
-model User {
-  id Int @id @default(autoincrement())
-
-  dni String @unique
-
-  firstName String
-  lastName  String
-
-  email    String? @unique
-  password String
-
-  role UserRole
-
-  coverageId  Int?
-  coverage    Coverage?  @relation(fields: [coverageId], references: [id])
-
-  appointments Appointment[] @relation("PatientAppointments")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  deletedAt DateTime?
-
-  hashedRefreshToken String?
-}
-
-model Professional {
-  id Int @id @default(autoincrement())
-
-  firstName String
-  lastName  String
-
-  licenseNumber String? @unique
-
-  specialties Specialty[]
-  coverages   Coverage[]
-
-  schedules Schedule[]
-
-  appointments Appointment[] @relation("ProfessionalAppointments")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  deletedAt DateTime?
-}
-
-model Specialty {
-  id Int @id @default(autoincrement())
-
-  name String @unique
-
-  description String?
-
-  professionals Professional[]
-
-  deletedAt DateTime?
-}
-
-model Coverage {
-  id Int @id @default(autoincrement())
-
-  name String @unique
-  description   String?
-
-  users         User[]
-
-  professionals Professional[]
-
-  appointments Appointment[]
-
-  deletedAt DateTime?
-}
-
 enum DayOfWeek {
   MONDAY
   TUESDAY
@@ -102,44 +105,4 @@ enum DayOfWeek {
   FRIDAY
   SATURDAY
   SUNDAY
-}
-
-model Schedule {
-  id Int @id @default(autoincrement())
-
-  professionalId Int
-
-  professional Professional @relation(fields: [professionalId], references: [id])
-
-  dayOfWeek DayOfWeek
-
-  startTime String
-  endTime   String
-
-  appointmentDuration Int
-}
-
-model Appointment {
-  id Int @id @default(autoincrement())
-
-  patientId Int
-  professionalId Int
-  coverageId Int
-
-  dateTime DateTime
-
-  status AppointmentStatus @default(PENDING)
-
-  notes String?
-
-  patient User @relation("PatientAppointments", fields: [patientId], references: [id])
-
-  professional Professional @relation("ProfessionalAppointments", fields: [professionalId], references: [id])
-
-  coverage Coverage @relation(fields: [coverageId], references: [id])
-
-  createdAt DateTime @default(now())
-
-  @@index([professionalId, dateTime])
-  @@index([patientId])
 }
