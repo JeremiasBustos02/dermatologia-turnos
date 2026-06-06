@@ -1,0 +1,13 @@
+id,dni,firstName,lastName,email,password,role,coverageId,createdAt,updatedAt,deletedAt,hashedRefreshToken
+1,30111222,Juan,Martinez,juan.martinez@gmail.com,$2b$10$abcdefghijklmnopqrstuv123456789012345678901234567890,PATIENT,1,2026-01-01T10:00:00Z,2026-01-01T10:00:00Z,,
+2,31222333,Maria,Garcia,maria.garcia@gmail.com,$2b$10$abcdefghijklmnopqrstuv123456789012345678901234567890,PATIENT,2,2026-01-01T10:00:00Z,2026-01-01T10:00:00Z,,
+3,32333444,Pedro,Lopez,pedro.lopez@gmail.com,$2b$10$abcdefghijklmnopqrstuv123456789012345678901234567890,PATIENT,1,2026-01-01T10:00:00Z,2026-01-01T10:00:00Z,,
+4,33444555,Lucia,Ramirez,lucia.ramirez@gmail.com,$2b$10$abcdefghijklmnopqrstuv123456789012345678901234567890,PATIENT,2,2026-01-01T10:00:00Z,2026-01-01T10:00:00Z,,
+5,34555666,Martin,Sosa,martin.sosa@gmail.com,$2b$10$abcdefghijklmnopqrstuv123456789012345678901234567890,PATIENT,3,2026-01-01T10:00:00Z,2026-01-01T10:00:00Z,,
+6,35666777,Valentina,Diaz,valentina.diaz@gmail.com,$2b$10$abcdefghijklmnopqrstuv123456789012345678901234567890,PATIENT,1,2026-01-01T10:00:00Z,2026-01-01T10:00:00Z,,
+7,36777888,Santiago,Romero,santiago.romero@gmail.com,$2b$10$abcdefghijklmnopqrstuv123456789012345678901234567890,PATIENT,2,2026-01-01T10:00:00Z,2026-01-01T10:00:00Z,,
+8,37888999,Florencia,Suarez,florencia.suarez@gmail.com,$2b$10$abcdefghijklmnopqrstuv123456789012345678901234567890,PATIENT,1,2026-01-01T10:00:00Z,2026-01-01T10:00:00Z,,
+9,38999000,Nicolas,Torres,nicolas.torres@gmail.com,$2b$10$abcdefghijklmnopqrstuv123456789012345678901234567890,PATIENT,3,2026-01-01T10:00:00Z,2026-01-01T10:00:00Z,,
+10,39111122,Camila,Acosta,camila.acosta@gmail.com,$2b$10$abcdefghijklmnopqrstuv123456789012345678901234567890,PATIENT,2,2026-01-01T10:00:00Z,2026-01-01T10:00:00Z,,
+100,20000000,Admin,Sistema,admin@clinicadermo.com,$2b$10$abcdefghijklmnopqrstuv123456789012345678901234567890,ADMIN,,2026-01-01T10:00:00Z,2026-01-01T10:00:00Z,,
+101,21000000,Recepcion,Principal,recepcion@clinicadermo.com,$2b$10$abcdefghijklmnopqrstuv123456789012345678901234567890,RECEPTIONIST,,2026-01-01T10:00:00Z,2026-01-01T10:00:00Z,,
