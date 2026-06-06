@@ -4,13 +4,14 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { FilterUsersDto } from './dto/FilterUsersDto';
-import { UserRole } from '@prisma/client/index-browser';
+import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) { }
 
   async create(dto: CreateUserDto) {
+    const { coverageId, ...userFields } = dto;
     let password = dto.password;
 
     if (!password && dto.role === UserRole.PATIENT) {
@@ -21,8 +22,9 @@ export class UsersService {
 
     return this.prisma.user.create({
       data: {
-        ...dto,
+        ...userFields,
         password: hashedPassword,
+        coverage: coverageId ? { connect: { id: coverageId } } : undefined,
       },
       select: {
         id: true,
@@ -31,13 +33,13 @@ export class UsersService {
         lastName: true,
         email: true,
         role: true,
+        coverage: true, 
       }
     });
   }
 
   async findAll(filters: FilterUsersDto) {
     const { page = 1, limit = 10, ...queryFilters } = filters;
-
     const skip = (page - 1) * limit;
 
     const whereCondition = {
@@ -67,6 +69,7 @@ export class UsersService {
           role: true,
           createdAt: true,
           updatedAt: true,
+          coverage: true,
         },
       }),
     ]);
@@ -95,22 +98,33 @@ export class UsersService {
         role: true,
         createdAt: true,
         updatedAt: true,
+        coverage: true,
       },
     });
 
     if (!user) {
-      throw new NotFoundException(
-        `No existe un usuario con ID ${id}`,
-      );
+      throw new NotFoundException(`No existe un usuario con ID ${id}`);
     }
 
     return user;
   }
 
-  update(id: number, dto: UpdateUserDto) {
+  async update(id: number, dto: UpdateUserDto) {
+    const { coverageId, ...userData } = dto;
+
     return this.prisma.user.update({
       where: { id },
-      data: dto,
+      data: {
+        ...userData,
+        coverage: coverageId
+          ? { connect: { id: coverageId } }
+          : coverageId === null
+            ? { disconnect: true }
+            : undefined,
+      },
+      include: {
+        coverage: true,
+      },
     });
   }
 
@@ -132,13 +146,12 @@ export class UsersService {
         role: true,
         createdAt: true,
         updatedAt: true,
+        coverage: true,
       },
     });
 
     if (!user) {
-      throw new NotFoundException(
-        `No existe un usuario con DNI ${dni}`,
-      );
+      throw new NotFoundException(`No existe un usuario con DNI ${dni}`);
     }
 
     return user;

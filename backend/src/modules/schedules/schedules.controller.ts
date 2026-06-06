@@ -1,47 +1,68 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, ParseIntPipe} from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  ParseIntPipe,
+  Query,
+} from '@nestjs/common';
 import { SchedulesService } from './schedules.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { FilterSchedulesDto } from './dto/FiltersSchedulesDto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { UserRole } from '@prisma/client';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { UpdateProfessionalSchedulesDto } from './dto/update-professional-schedules.dto';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth('access-token')
 @ApiTags('Schedules')
 @Controller('schedules')
 export class SchedulesController {
   constructor(private readonly schedulesService: SchedulesService) {}
 
+  @ApiOperation({ summary: 'Crear un horario individual' })
   @Post()
-  @Roles(UserRole.ADMIN)
   create(@Body() createScheduleDto: CreateScheduleDto) {
     return this.schedulesService.create(createScheduleDto);
   }
 
+  @ApiOperation({ summary: 'Listar horarios con filtros y paginación' })
   @Get()
-  @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
   findAll(@Query() filters: FilterSchedulesDto) {
     return this.schedulesService.findAll(filters);
   }
 
+  @ApiOperation({ summary: 'Obtener un horario específico por su ID' })
   @Get(':id')
-  @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.schedulesService.findOne(id);
   }
 
-  @Patch(':id')
-  @Roles(UserRole.ADMIN)
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateScheduleDto: UpdateScheduleDto) {
+  @ApiOperation({ summary: 'Actualizar un horario individual' })
+  @Put(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateScheduleDto: UpdateScheduleDto,
+  ) {
     return this.schedulesService.update(id, updateScheduleDto);
   }
 
+  @ApiOperation({ summary: 'Eliminar un horario específico' })
   @Delete(':id')
-  @Roles(UserRole.ADMIN)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.schedulesService.remove(id);
+  }
+
+  // =========================================================================
+  // NUEVO ENDPOINT MASIVO: Guarda o pisa la agenda completa de un médico
+  // =========================================================================
+  @ApiOperation({ summary: 'Reemplazar la grilla semanal completa de un profesional' })
+  @Post('professional/:professionalId')
+  replaceProfessionalSchedules(
+    @Param('professionalId', ParseIntPipe) professionalId: number,
+    @Body() dto: UpdateProfessionalSchedulesDto,
+  ) {
+    return this.schedulesService.replaceProfessionalSchedules(professionalId, dto);
   }
 }

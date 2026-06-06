@@ -17,12 +17,10 @@ export class ProfessionalsService {
         specialties: {
           connect: dto.specialtyIds.map(id => ({ id })),
         },
-
         coverages: {
           connect: dto.coverageIds.map(id => ({ id })),
         },
       },
-
       include: {
         specialties: true,
         coverages: true,
@@ -85,10 +83,22 @@ export class ProfessionalsService {
     });
   }
 
-  update(id: number, updateProfessionalDto: UpdateProfessionalDto) {
+  async update(id: number, updateProfessionalDto: UpdateProfessionalDto) {
+    const { specialtyIds, coverageIds, ...professionalData } = updateProfessionalDto;
+
     return this.prisma.professional.update({
       where: { id },
-      data: updateProfessionalDto,
+      data: {
+        ...professionalData,
+
+        specialties: specialtyIds ? {
+          set: specialtyIds.map(id => ({ id }))
+        } : undefined,
+
+        coverages: coverageIds ? {
+          set: coverageIds.map(id => ({ id }))
+        } : undefined,
+      },
       include: {
         specialties: true,
         coverages: true,
