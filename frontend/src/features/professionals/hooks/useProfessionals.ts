@@ -13,9 +13,8 @@ export const useProfessionals = () => {
 
 export const useCreateProfessional = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: (newProfessional: CreateProfessionalDTO) => createProfessional(newProfessional),
+    mutationFn: createProfessional,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: PROFESSIONALS_KEY });
     },
@@ -24,9 +23,8 @@ export const useCreateProfessional = () => {
 
 export const useDeleteProfessional = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: (id: number) => deleteProfessional(id),
+    mutationFn: deleteProfessional,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: PROFESSIONALS_KEY });
     },
@@ -36,7 +34,7 @@ export const useDeleteProfessional = () => {
 export const useUpdateProfessional = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: updateProfessional,
+    mutationFn: ({ id, data }: { id: number; data: CreateProfessionalDTO }) => updateProfessional({ id, data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: PROFESSIONALS_KEY });
     },

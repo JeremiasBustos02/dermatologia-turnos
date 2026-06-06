@@ -31,17 +31,6 @@ export const ProfessionalsPage = () => {
   };
 
   const handleFormSubmit = (data: CreateProfessionalDTO) => {
-  if (professionalToEdit) {
-    updateMutation.mutate(
-      { id: professionalToEdit.id, data },
-      { 
-        onSuccess: () => {
-          setIsModalOpen(false);
-          setProfessionalToEdit(null);
-        } 
-      }
-    );
-  } else {
     const sanitizedData = {
       firstName: data.firstName,
       lastName: data.lastName,
@@ -50,13 +39,24 @@ export const ProfessionalsPage = () => {
       coverageIds: Array.isArray(data.coverageIds) ? data.coverageIds.map(Number) : []
     };
 
-    createMutation.mutate(sanitizedData as any, {
-      onSuccess: () => {
-        setIsModalOpen(false); 
-      }
-    });
-  }
-};
+    if (professionalToEdit) {
+      updateMutation.mutate(
+        { id: professionalToEdit.id, data: sanitizedData as any },
+        { 
+          onSuccess: () => {
+            setIsModalOpen(false);
+            setProfessionalToEdit(null);
+          } 
+        }
+      );
+    } else {
+      createMutation.mutate(sanitizedData as any, {
+        onSuccess: () => {
+          setIsModalOpen(false); 
+        }
+      });
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 relative">

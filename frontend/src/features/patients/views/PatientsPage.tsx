@@ -32,18 +32,34 @@ export const PatientsPage = () => {
 
   const handleFormSubmit = (data: CreatePatientDTO) => {
     if (patientToEdit) {
+      const updateData = {
+        dni: data.dni,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        coverageId: !data.coverageId ? null : Number(data.coverageId)
+      };
+
       updateMutation.mutate(
-        { id: patientToEdit.id, data },
-        { onSuccess: () => setIsModalOpen(false) }
+        { id: patientToEdit.id, data: updateData as any },
+        { 
+          onSuccess: () => {
+            setIsModalOpen(false);
+            setPatientToEdit(null); 
+          } 
+        }
       );
     } else {
       const completeData = {
         ...data,
+        coverageId: !data.coverageId ? null : Number(data.coverageId),
         role: 'PATIENT' as const
       };
 
       createMutation.mutate(completeData, {
-        onSuccess: () => setIsModalOpen(false)
+        onSuccess: () => {
+          setIsModalOpen(false);
+        }
       });
     }
   };
@@ -58,7 +74,7 @@ export const PatientsPage = () => {
         
         <button 
           onClick={handleCreateClick}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-xs transition-colors"
         >
           <Plus size={20} />
           Nuevo Paciente
@@ -83,7 +99,10 @@ export const PatientsPage = () => {
 
       <PatientModal 
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setPatientToEdit(null);
+        }}
         onSubmit={handleFormSubmit}
         patientToEdit={patientToEdit}
       />

@@ -33,6 +33,7 @@ export interface Patient {
   firstName: string;
   lastName: string;
   email: string;
+  coverageId?: number | null;
 }
 
 export interface CreatePatientDTO {
@@ -40,6 +41,7 @@ export interface CreatePatientDTO {
   firstName: string;
   lastName: string;
   email: string;
+  coverageId?: number | null;
 }
 
 export interface Specialty {
