@@ -62,23 +62,6 @@ export const SummaryStep = ({ appointmentData, onConfirm, isSubmitting }: Summar
           </div>
         </div>
       </div>
-
-      <div className="flex justify-end pt-6">
-        <button 
-          onClick={onConfirm}
-          disabled={isSubmitting}
-          className="w-full sm:w-auto px-8 py-3 bg-emerald-600 text-white font-bold rounded-xl disabled:opacity-70 disabled:cursor-not-allowed hover:bg-emerald-700 transition-colors shadow-sm flex justify-center items-center gap-2"
-        >
-          {isSubmitting ? (
-            <>
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              Guardando...
-            </>
-          ) : (
-            'Confirmar Turno'
-          )}
-        </button>
-      </div>
     </div>
   );
 };
