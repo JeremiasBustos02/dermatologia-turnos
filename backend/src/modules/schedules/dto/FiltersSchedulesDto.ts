@@ -4,20 +4,20 @@ import { Type } from 'class-transformer';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 export class FilterSchedulesDto extends PaginationDto {
-    @IsOptional()
-    @Type(() => Number)
-    @IsNumber()
-    professionalId?: number;
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  professionalId?: number;
     
-    @IsOptional()
-    @IsEnum(DayOfWeek)
-    dayOfWeek?: DayOfWeek;
+  @IsOptional()
+  @IsEnum(DayOfWeek)
+  dayOfWeek?: DayOfWeek;
 
-    @IsOptional()
-    @IsString()
-    startTime?: string;
+  @IsOptional()
+  @IsString()
+  startTime?: string;
 
-    @IsOptional()
-    @IsString()
-    endTime?: string;
+  @IsOptional()
+  @IsString()
+  endTime?: string;
 }

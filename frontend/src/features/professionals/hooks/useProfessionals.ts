@@ -1,35 +1,42 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getProfessionals, createProfessional, deleteProfessional } from '../services/professionals.api';
+import { getProfessionals, createProfessional, deleteProfessional, updateProfessional } from '../services/professionals.api';
 import type { CreateProfessionalDTO } from '../../../types/index';
 
-// Hook para LEER (Read)
+const PROFESSIONALS_KEY = ['professionals'];
+
 export const useProfessionals = () => {
   return useQuery({
-    queryKey: ['professionals'],
+    queryKey: PROFESSIONALS_KEY,
     queryFn: getProfessionals,
   });
 };
 
-// Hook para CREAR (Create)
 export const useCreateProfessional = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: (newProfessional: CreateProfessionalDTO) => createProfessional(newProfessional),
+    mutationFn: createProfessional,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['professionals'] });
+      queryClient.invalidateQueries({ queryKey: PROFESSIONALS_KEY });
     },
   });
 };
 
-// Hook para ELIMINAR (Delete)
 export const useDeleteProfessional = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: (id: number) => deleteProfessional(id),
+    mutationFn: deleteProfessional,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['professionals'] });
+      queryClient.invalidateQueries({ queryKey: PROFESSIONALS_KEY });
+    },
+  });
+};
+
+export const useUpdateProfessional = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: CreateProfessionalDTO }) => updateProfessional({ id, data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: PROFESSIONALS_KEY });
     },
   });
 };

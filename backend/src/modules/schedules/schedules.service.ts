@@ -1,9 +1,10 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { DayOfWeek } from '@prisma/client';
+import { DayOfWeek, Schedule } from '@prisma/client';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { FilterSchedulesDto } from './dto/FiltersSchedulesDto';
+import { UpdateProfessionalSchedulesDto } from './dto/update-professional-schedules.dto';
 
 @Injectable()
 export class SchedulesService {
@@ -17,15 +18,11 @@ export class SchedulesService {
     });
 
     if (!professional) {
-      throw new BadRequestException(
-        'El profesional no existe',
-      );
+      throw new BadRequestException('El profesional no existe');
     }
 
     if (dto.startTime >= dto.endTime) {
-      throw new BadRequestException(
-        'La hora de fin debe ser mayor que la hora de inicio',
-      );
+      throw new BadRequestException('La hora de fin debe ser mayor que la hora de inicio');
     }
 
     await this.validateScheduleOverlap(
@@ -76,68 +73,44 @@ export class SchedulesService {
   }
 
   async findOne(id: number) {
-    const schedule =
-      await this.prisma.schedule.findUnique({
-        where: { id },
-        include: {
-          professional: true,
-        },
-      });
+    const schedule = await this.prisma.schedule.findUnique({
+      where: { id },
+      include: {
+        professional: true,
+      },
+    });
 
     if (!schedule) {
-      throw new BadRequestException(
-        `Horario con ID ${id} no encontrado.`,
-      );
+      throw new BadRequestException(`Horario con ID ${id} no encontrado.`);
     }
 
     return schedule;
   }
 
-  async update(
-    id: number,
-    updateScheduleDto: UpdateScheduleDto,
-  ) {
+  async update(id: number, updateScheduleDto: UpdateScheduleDto) {
     const schedule = await this.findOne(id);
 
     if (!schedule) {
-      throw new BadRequestException(
-        'El horario no existe',
-      );
+      throw new BadRequestException('El horario no existe');
     }
 
-    const professionalId =
-      updateScheduleDto.professionalId ??
-      schedule.professionalId;
+    const professionalId = updateScheduleDto.professionalId ?? schedule.professionalId;
+    const dayOfWeek = updateScheduleDto.dayOfWeek ?? schedule.dayOfWeek;
+    const startTime = updateScheduleDto.startTime ?? schedule.startTime;
+    const endTime = updateScheduleDto.endTime ?? schedule.endTime;
 
-    const dayOfWeek =
-      updateScheduleDto.dayOfWeek ??
-      schedule.dayOfWeek;
-
-    const startTime =
-      updateScheduleDto.startTime ??
-      schedule.startTime;
-
-    const endTime =
-      updateScheduleDto.endTime ??
-      schedule.endTime;
-
-    const professional =
-      await this.prisma.professional.findUnique({
-        where: {
-          id: professionalId,
-        },
-      });
+    const professional = await this.prisma.professional.findUnique({
+      where: {
+        id: professionalId,
+      },
+    });
 
     if (!professional) {
-      throw new BadRequestException(
-        'El profesional no existe',
-      );
+      throw new BadRequestException('El profesional no existe');
     }
 
     if (startTime >= endTime) {
-      throw new BadRequestException(
-        'La hora de fin debe ser mayor que la hora de inicio',
-      );
+      throw new BadRequestException('La hora de fin debe ser mayor que la hora de inicio');
     }
 
     await this.validateScheduleOverlap(
@@ -157,6 +130,14 @@ export class SchedulesService {
     });
   }
 
+  async remove(id: number) {
+    await this.findOne(id);
+
+    return this.prisma.schedule.delete({
+      where: { id },
+    });
+  }
+
   private async validateScheduleOverlap(
     professionalId: number,
     dayOfWeek: DayOfWeek,
@@ -164,47 +145,83 @@ export class SchedulesService {
     endTime: string,
     ignoreScheduleId?: number,
   ) {
-    const overlappingSchedule =
-      await this.prisma.schedule.findFirst({
-        where: {
-          professionalId,
-          dayOfWeek,
-
-          id: ignoreScheduleId
-            ? {
-              not: ignoreScheduleId,
-            }
-            : undefined,
-
-          AND: [
-            {
-              startTime: {
-                lt: endTime,
-              },
-            },
-            {
-              endTime: {
-                gt: startTime,
-              },
-            },
-          ],
-        },
-      });
+    const overlappingSchedule = await this.prisma.schedule.findFirst({
+      where: {
+        professionalId,
+        dayOfWeek,
+        id: ignoreScheduleId ? { not: ignoreScheduleId } : undefined,
+        AND: [
+          { startTime: { lt: endTime } },
+          { endTime: { gt: startTime } },
+        ],
+      },
+    });
 
     if (overlappingSchedule) {
-      throw new BadRequestException(
-        'Ya existe un horario superpuesto para ese profesional.',
-      );
+      throw new BadRequestException('Ya existe un horario superpuesto para ese profesional.');
     }
   }
 
-  async remove(id: number) {
-    const schedule = await this.findOne(id);
+  // =========================================================================
+  // MÉDODO DE REEMPLAZO MASIVO PARA EL DASHBOARD DEL ADMINISTRADOR
+  // =========================================================================
+  async replaceProfessionalSchedules(
+    professionalId: number,
+    dto: UpdateProfessionalSchedulesDto,
+  ) {
+    const professional = await this.prisma.professional.findUnique({
+      where: { id: professionalId, deletedAt: null },
+    });
 
-    return this.prisma.schedule.delete({
-      where: { id },
+    if (!professional) {
+      throw new BadRequestException('El profesional no existe o fue eliminado');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.schedule.deleteMany({
+        where: { professionalId },
+      });
+
+      const createdSchedules: Schedule[] = [];
+
+      for (const item of dto.schedules) {
+        if (item.startTime >= item.endTime) {
+          throw new BadRequestException(
+            `Error en el día ${item.dayOfWeek}: La hora de fin (${item.endTime}) debe ser mayor que la de inicio (${item.startTime}).`,
+          );
+        }
+
+        const overlap = await tx.schedule.findFirst({
+          where: {
+            professionalId,
+            dayOfWeek: item.dayOfWeek,
+            AND: [
+              { startTime: { lt: item.endTime } },
+              { endTime: { gt: item.startTime } },
+            ],
+          },
+        });
+
+        if (overlap) {
+          throw new BadRequestException(
+            `Existe una superposición de horarios para el día ${item.dayOfWeek} entre las horas configuradas.`,
+          );
+        }
+
+        const newSchedule = await tx.schedule.create({
+          data: {
+            professionalId,
+            dayOfWeek: item.dayOfWeek,
+            startTime: item.startTime,
+            endTime: item.endTime,
+            appointmentDuration: item.appointmentDuration,
+          },
+        });
+
+        createdSchedules.push(newSchedule);
+      }
+
+      return createdSchedules;
     });
   }
-
 }
-

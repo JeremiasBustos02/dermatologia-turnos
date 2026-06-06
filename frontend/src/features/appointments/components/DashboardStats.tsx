@@ -13,43 +13,47 @@ export const DashboardStats = ({ appointments }: DashboardStatsProps) => {
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between transition-all hover:shadow-md">
+      {/* Tarjeta: Total */}
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between transition-all hover:border-slate-300">
         <div>
-          <p className="text-sm font-medium text-slate-500">Turnos del Día</p>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{total}</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Citas del Día</p>
+          <p className="text-2xl font-bold text-slate-900 mt-1 tracking-tight">{total}</p>
         </div>
-        <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
-          <Calendar size={22} />
+        <div className="p-2.5 bg-slate-50 text-slate-500 rounded-lg border border-slate-200/60 shadow-xs">
+          <Calendar size={18} />
         </div>
       </div>
 
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between transition-all hover:shadow-md">
+      {/* Tarjeta: Confirmados */}
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between transition-all hover:border-slate-300">
         <div>
-          <p className="text-sm font-medium text-slate-500">Confirmados</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">{confirmed}</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Confirmados</p>
+          <p className="text-2xl font-bold text-blue-600 mt-1 tracking-tight">{confirmed}</p>
         </div>
-        <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
-          <Clock size={22} />
+        <div className="p-2.5 bg-blue-50/50 text-blue-600 rounded-lg border border-blue-100 shadow-xs">
+          <Clock size={18} />
         </div>
       </div>
 
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between transition-all hover:shadow-md">
+      {/* Tarjeta: Atendidos */}
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between transition-all hover:border-slate-300">
         <div>
-          <p className="text-sm font-medium text-slate-500">Atendidos</p>
-          <p className="text-2xl font-bold text-emerald-600 mt-1">{completed}</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Atendidos</p>
+          <p className="text-2xl font-bold text-emerald-600 mt-1 tracking-tight">{completed}</p>
         </div>
-        <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
-          <CheckCircle size={22} />
+        <div className="p-2.5 bg-emerald-50/50 text-emerald-600 rounded-lg border border-emerald-100 shadow-xs">
+          <CheckCircle size={18} />
         </div>
       </div>
 
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between transition-all hover:shadow-md">
+      {/* Tarjeta: Cancelados */}
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between transition-all hover:border-slate-300">
         <div>
-          <p className="text-sm font-medium text-slate-500">Cancelados</p>
-          <p className="text-2xl font-bold text-red-600 mt-1">{cancelled}</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Cancelados</p>
+          <p className="text-2xl font-bold text-rose-600 mt-1 tracking-tight">{cancelled}</p>
         </div>
-        <div className="p-3 bg-red-50 text-red-600 rounded-lg">
-          <XCircle size={22} />
+        <div className="p-2.5 bg-rose-50/50 text-rose-600 rounded-lg border border-rose-100 shadow-xs">
+          <XCircle size={18} />
         </div>
       </div>
     </div>

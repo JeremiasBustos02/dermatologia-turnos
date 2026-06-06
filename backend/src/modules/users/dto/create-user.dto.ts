@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { UserRole } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -21,10 +21,16 @@ export class CreateUserDto {
   email?: string;
 
   @ApiProperty()
+  @IsOptional()
   @IsString()
   password!: string;
 
   @ApiProperty()
   @IsEnum(UserRole)
   role!: UserRole;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber() 
+  coverageId?: number | null;
 }
