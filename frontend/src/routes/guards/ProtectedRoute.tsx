@@ -9,8 +9,7 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute = ({ allowedRoles, allowOnlyPatients = false }: ProtectedRouteProps) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const user = useAuthStore((state) => state.user); // Recuperamos el usuario con su rol del store global
-  const location = useLocation();
+  const user = useAuthStore((state) => state.user); 
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;

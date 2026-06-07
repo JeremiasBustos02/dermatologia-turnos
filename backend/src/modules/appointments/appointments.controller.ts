@@ -1,12 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { FiltersAppointmentsDto } from './dto/FiltersAppointmentsDto';
+import { GetAvailableSlotsDto } from './dto/get-available-slots.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { PositiveIntPipe } from 'src/common/pipes/positive-int.pipe';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('Appointments')
@@ -18,13 +20,9 @@ export class AppointmentsController {
   @Get('available-slots')
   @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
   getAvailableSlots(
-    @Query('professionalId') professionalId: string,
-    @Query('date') date: string,
+    @Query() query: GetAvailableSlotsDto,
   ) {
-    return this.appointmentsService.getAvailableSlots(
-      Number(professionalId),
-      date,
-    );
+    return this.appointmentsService.getAvailableSlots(query.professionalId, query.date);
   }
 
   @Post()
@@ -41,31 +39,31 @@ export class AppointmentsController {
 
   @Get(':id')
   @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id', PositiveIntPipe) id: number) {
     return this.appointmentsService.findOne(id);
   }
 
   @Patch(':id')
   @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateAppointmentDto: UpdateAppointmentDto) {
+  update(@Param('id', PositiveIntPipe) id: number, @Body() updateAppointmentDto: UpdateAppointmentDto) {
     return this.appointmentsService.update(id, updateAppointmentDto);
   }
 
   @Patch(':id/confirm')
   @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
-  confirmAppointment(@Param('id', ParseIntPipe) id: number) {
+  confirmAppointment(@Param('id', PositiveIntPipe) id: number) {
     return this.appointmentsService.confirmAppointment(id);
   }
 
   @Patch(':id/cancel')
   @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
-  cancelAppointment(@Param('id', ParseIntPipe) id: number) {
+  cancelAppointment(@Param('id', PositiveIntPipe) id: number) {
     return this.appointmentsService.cancelAppointment(id);
   }
 
   @Patch(':id/complete')
   @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
-  completeAppointment(@Param('id', ParseIntPipe) id: number) {
+  completeAppointment(@Param('id', PositiveIntPipe) id: number) {
     return this.appointmentsService.completeAppointment(id);
   }
 }

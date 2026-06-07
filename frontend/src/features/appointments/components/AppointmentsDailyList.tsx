@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
-import { CheckCircle, XCircle, CalendarCheck, CalendarDays, AlertTriangle } from 'lucide-react';
+import { CheckCircle, XCircle, CalendarCheck, CalendarDays, AlertTriangle, History as HistoryIcon } from 'lucide-react';
 import type { Appointment } from '../types';
 import { useUpdateAppointmentStatus } from '../hooks/useAppointments';
+import { MedicalRecordModal } from './MedicalRecordModal';
+import { PatientHistoryDrawer } from './PatientHistoryDrawer';
 
 interface AppointmentsDailyListProps {
   appointments: Appointment[];
@@ -28,8 +30,9 @@ export const AppointmentsDailyList = ({ appointments, isLoading }: AppointmentsD
   const navigate = useNavigate();
   const updateStatusMutation = useUpdateAppointmentStatus();
   
-  // Modal de confirmación estilizado SaaS
   const [cancelModal, setCancelModal] = useState<{ open: boolean; id: number | null }>({ open: false, id: null });
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [historyPatient, setHistoryPatient] = useState<Appointment['patient'] | null>(null);
 
   const handleUpdateStatus = (id: number, newStatus: 'CONFIRMED' | 'COMPLETED' | 'CANCELLED') => {
     if (newStatus === 'CANCELLED') {
@@ -93,6 +96,20 @@ export const AppointmentsDailyList = ({ appointments, isLoading }: AppointmentsD
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
       
+      {/* MODAL DE EVOLUCIÓN CLÍNICA */}
+      <MedicalRecordModal 
+        isOpen={!!selectedAppointment} 
+        onClose={() => setSelectedAppointment(null)} 
+        appointment={selectedAppointment} 
+      />
+
+      {/* DRAWER DE HISTORIAL DEL PACIENTE */}
+      <PatientHistoryDrawer 
+        isOpen={!!historyPatient}
+        onClose={() => setHistoryPatient(null)}
+        patient={historyPatient}
+      />
+
       {/* Modal de Cancelación Integrado */}
       {cancelModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs">
@@ -133,7 +150,7 @@ export const AppointmentsDailyList = ({ appointments, isLoading }: AppointmentsD
               <th className="px-6 py-3.5">Especialista</th>
               <th className="px-6 py-3.5">Cobertura</th>
               <th className="px-6 py-3.5">Estado</th>
-              <th className="px-6 py-3.5 text-center">Acciones de Auditoría</th>
+              <th className="px-6 py-3.5 text-center">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-slate-600 font-medium">
@@ -145,25 +162,46 @@ export const AppointmentsDailyList = ({ appointments, isLoading }: AppointmentsD
                   <td className="px-6 py-4 font-bold text-slate-900 text-sm tracking-tight">
                     {dayjs(appointment.dateTime).format('HH:mm')} hs
                   </td>
+                  
+                  {/* Celda del Paciente con Botón de Historial */}
                   <td className="px-6 py-4">
-                    <span className="font-semibold text-slate-800 block text-xs">
-                      {appointment.patient.firstName} {appointment.patient.lastName}
-                    </span>
-                    <span className="text-[10px] text-slate-400 block mt-0.5 font-normal">DNI: {appointment.patient.dni}</span>
+                    <div className="flex items-center justify-between group">
+                      <div>
+                        <span className="font-semibold text-slate-800 block text-xs">
+                          {appointment.patient.firstName} {appointment.patient.lastName}
+                        </span>
+                        <span className="text-[10px] text-slate-400 block mt-0.5 font-normal">
+                          DNI: {appointment.patient.dni}
+                        </span>
+                      </div>
+                      
+                      <button
+                        onClick={() => setHistoryPatient(appointment.patient)}
+                        className="p-1.5 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors opacity-0 group-hover:opacity-100 sm:opacity-100"
+                        title="Ver Historial Clínico"
+                      >
+                        {/* Usamos el alias HistoryIcon aquí */}
+                        <HistoryIcon size={16} />
+                      </button>
+                    </div>
                   </td>
+
                   <td className="px-6 py-4 text-slate-700 font-semibold">
                     Dr/a. {appointment.professional.firstName} {appointment.professional.lastName}
                   </td>
+                  
                   <td className="px-6 py-4">
                     <span className="bg-slate-50 text-slate-600 border border-slate-200 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase">
                       {appointment.coverage?.name || 'Particular'}
                     </span>
                   </td>
+                  
                   <td className="px-6 py-4">
                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border tracking-wider uppercase ${statusStyles[appointment.status]}`}>
                       {statusTranslations[appointment.status]}
                     </span>
                   </td>
+                  
                   <td className="px-6 py-4">
                     <div className="flex justify-center gap-1">
                       <button 
@@ -176,10 +214,10 @@ export const AppointmentsDailyList = ({ appointments, isLoading }: AppointmentsD
                       </button>
 
                       <button 
-                        onClick={() => handleUpdateStatus(appointment.id, 'COMPLETED')}
+                        onClick={() => setSelectedAppointment(appointment)}
                         disabled={isPastOrClosed || updateStatusMutation.isPending}
                         className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-md hover:bg-emerald-50 disabled:opacity-20 transition-all" 
-                        title="Marcar Atendido"
+                        title="Escribir Evolución y Marcar Atendido"
                       >
                         <CheckCircle size={14} />
                       </button>

@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
 }
 
 datasource db {
@@ -9,34 +10,64 @@ datasource db {
 }
 
 model User {
-  id                 Int           @id @default(autoincrement())
-  dni                String        @unique
-  firstName          String
-  lastName           String
-  email              String?       @unique
-  password           String
-  role               UserRole
-  coverageId         Int?
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-  deletedAt          DateTime?
-  hashedRefreshToken String?
-  appointments       Appointment[] @relation("PatientAppointments")
-  coverage           Coverage?     @relation(fields: [coverageId], references: [id])
+  id                  Int             @id @default(autoincrement())
+  dni                 String          @unique
+  firstName           String
+  lastName            String
+  email               String?         @unique
+  password            String
+  role                UserRole
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @default(now()) @updatedAt
+  deletedAt           DateTime?
+  hashedRefreshToken  String?
+  coverageId          Int?
+  appointments        Appointment[]   @relation("PatientAppointments")
+  medicalRecords      MedicalRecord[] @relation("PatientMedicalRecords")
+  professionalProfile Professional?
+  coverage            Coverage?       @relation(fields: [coverageId], references: [id])
+
+  @@index([coverageId])
+  @@index([deletedAt])
 }
 
 model Professional {
-  id            Int           @id @default(autoincrement())
-  firstName     String
-  lastName      String
-  licenseNumber String?       @unique
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  deletedAt     DateTime?
-  appointments  Appointment[] @relation("ProfessionalAppointments")
-  schedules     Schedule[]
-  coverages     Coverage[]    @relation("CoverageToProfessional")
-  specialties   Specialty[]   @relation("ProfessionalToSpecialty")
+  id             Int             @id @default(autoincrement())
+  firstName      String
+  lastName       String
+  licenseNumber  String?         @unique
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @default(now()) @updatedAt
+  deletedAt      DateTime?
+  userId         Int?            @unique
+  appointments   Appointment[]   @relation("ProfessionalAppointments")
+  medicalRecords MedicalRecord[] @relation("ProfessionalMedicalRecords")
+  user           User?           @relation(fields: [userId], references: [id])
+  schedules      Schedule[]
+  coverages      Coverage[]      @relation("CoverageToProfessional")
+  specialties    Specialty[]     @relation("ProfessionalToSpecialty")
+
+  @@index([deletedAt])
+}
+
+model MedicalRecord {
+  id             Int          @id @default(autoincrement())
+  patientId      Int
+  professionalId Int
+  appointmentId  Int?         @unique
+  reason         String?
+  evolution      String
+  prescription   String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now()) @updatedAt
+  appointment    Appointment? @relation(fields: [appointmentId], references: [id])
+  patient        User         @relation("PatientMedicalRecords", fields: [patientId], references: [id])
+  professional   Professional @relation("ProfessionalMedicalRecords", fields: [professionalId], references: [id])
+
+  @@index([patientId])
+  @@index([patientId, createdAt])
+  @@index([professionalId])
+  @@index([professionalId, createdAt])
 }
 
 model Specialty {
@@ -50,8 +81,8 @@ model Specialty {
 model Coverage {
   id            Int            @id @default(autoincrement())
   name          String         @unique
-  description   String?
   deletedAt     DateTime?
+  description   String?
   appointments  Appointment[]
   users         User[]
   professionals Professional[] @relation("CoverageToProfessional")
@@ -60,11 +91,14 @@ model Coverage {
 model Schedule {
   id                  Int          @id @default(autoincrement())
   professionalId      Int
-  dayOfWeek           DayOfWeek
   startTime           String
   endTime             String
   appointmentDuration Int
+  dayOfWeek           DayOfWeek
   professional        Professional @relation(fields: [professionalId], references: [id])
+
+  @@index([professionalId])
+  @@index([professionalId, dayOfWeek])
 }
 
 model Appointment {
@@ -79,15 +113,20 @@ model Appointment {
   coverage       Coverage          @relation(fields: [coverageId], references: [id])
   patient        User              @relation("PatientAppointments", fields: [patientId], references: [id])
   professional   Professional      @relation("ProfessionalAppointments", fields: [professionalId], references: [id])
+  medicalRecord  MedicalRecord?
 
   @@index([professionalId, dateTime])
+  @@index([patientId, dateTime])
   @@index([patientId])
+  @@index([coverageId])
+  @@index([dateTime])
 }
 
 enum UserRole {
   PATIENT
   RECEPTIONIST
   ADMIN
+  PROFESSIONAL
 }
 
 enum AppointmentStatus {

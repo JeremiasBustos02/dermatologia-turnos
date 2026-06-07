@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
 import { SpecialtiesService } from './specialties.service';
 import { CreateSpecialtyDto } from './dto/create-specialty.dto';
 import { UpdateSpecialtyDto } from './dto/update-specialty.dto';
@@ -7,6 +7,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { PositiveIntPipe } from 'src/common/pipes/positive-int.pipe';
 
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('access-token')
@@ -30,7 +31,7 @@ export class SpecialtiesController {
   @Get(':id')
   @Roles(UserRole.ADMIN)
   findOne(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', PositiveIntPipe) id: number,
   ) {
     return this.specialtiesService.findOne(id);
   }
@@ -38,7 +39,7 @@ export class SpecialtiesController {
   @Patch(':id')
   @Roles(UserRole.ADMIN)
   update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', PositiveIntPipe) id: number,
     @Body() dto: UpdateSpecialtyDto,
   ) {
     return this.specialtiesService.update(id, dto);
@@ -46,7 +47,7 @@ export class SpecialtiesController {
 
   @Delete(':id')
   @Roles(UserRole.ADMIN)
-  remove(@Param('id', ParseIntPipe) id: number) {
+  remove(@Param('id', PositiveIntPipe) id: number) {
     return this.specialtiesService.remove(id);
   }
 }

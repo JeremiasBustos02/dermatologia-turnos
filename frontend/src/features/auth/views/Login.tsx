@@ -7,7 +7,8 @@ export const Login = () => {
   const [dni, setDni] = useState('');
   const [password, setPassword] = useState('');
 
-  const { setToken } = useAuthStore();
+  // Traemos setToken y también setSession
+  const { setToken, setSession } = useAuthStore();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,9 +20,12 @@ export const Login = () => {
         password,
       });
 
-      setToken(data.accessToken);
-
       localStorage.setItem('refreshToken', data.refreshToken);
+      setToken(data.accessToken); 
+
+      const userResponse = await apiClient.get('/auth/me');
+
+      setSession(data.accessToken, userResponse.data);
 
       navigate('/dashboard');
     } catch (error) {
