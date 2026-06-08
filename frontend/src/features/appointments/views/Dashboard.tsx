@@ -32,7 +32,7 @@ export const Dashboard = () => {
   }, [location, navigate]);
 
   const formattedDate = date ? dayjs(date).format('YYYY-MM-DD') : undefined;
-  const { data: appointments = [], isLoading, isError } = useAppointments({ dateFrom: formattedDate });
+  const { data: appointments = [], isLoading, isError } = useAppointments({ dateFrom: formattedDate, dateTo: formattedDate });
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 relative">
