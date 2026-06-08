@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createAppointment, getAppointments, getProfessionalSchedules, updateAppointmentStatus } from "../services/appointments.api";
+import { createAppointment, getAppointments, updateAppointmentStatus } from "../services/appointments.api";
 import type { AppointmentFilters } from "../services/appointments.api";
 import { getAvailableSlots } from '../services/appointments.api';
 
@@ -28,14 +28,6 @@ export const useCreateAppointment = () => {
   });
 };
 
-export const useProfessionalSchedules = (professionalId: number) => {
-  return useQuery({
-    queryKey: ['schedules', professionalId],
-    queryFn: () => getProfessionalSchedules(professionalId),
-    enabled: !!professionalId,
-  });
-};
-
 export const useUpdateAppointmentStatus = () => {
   const queryClient = useQueryClient();
   
@@ -50,3 +42,5 @@ export const useUpdateAppointmentStatus = () => {
     }
   });
 };
+
+export { useProfessionalSchedules } from '../../schedules/hooks/useSchedules';

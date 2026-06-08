@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../../auth/auth.store';
+import { useAuthStore } from '../auth.store';
 import { apiClient } from '../../../api/apiClient';
 
 export const Login = () => {

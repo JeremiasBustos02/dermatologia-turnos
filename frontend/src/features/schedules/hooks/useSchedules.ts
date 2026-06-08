@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getProfessionalSchedules, createSchedule, deleteSchedule } from '../services/schedules.api';
-import type { CreateScheduleDTO } from '../types';
+import { apiClient } from '../../../api/apiClient';
+import { getProfessionalSchedules } from '../services/schedules.api';
 
 export const useProfessionalSchedules = (professionalId: number) => {
     return useQuery({
@@ -10,18 +10,23 @@ export const useProfessionalSchedules = (professionalId: number) => {
     });
 };
 
-export const useCreateSchedule = (professionalId: number) => {
+export const useSaveProfessionalSchedules = (professionalId: number) => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (newSchedule: CreateScheduleDTO) => createSchedule(newSchedule),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['schedules', professionalId] }),
-    });
-};
-
-export const useDeleteSchedule = (professionalId: number) => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (id: number) => deleteSchedule(id),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['schedules', professionalId] }),
+        mutationFn: async (schedules: {
+            professionalId: number;
+            dayOfWeek: string;
+            startTime: string;
+            endTime: string;
+            appointmentDuration: number;
+        }[]) => {
+            const { data } = await apiClient.post(`/schedules/professional/${professionalId}`, {
+                schedules,
+            });
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['schedules', professionalId] });
+        },
     });
 };

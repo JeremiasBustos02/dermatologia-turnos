@@ -9,7 +9,7 @@ import { ProfessionalSchedulesPage } from '../features/schedules/views/Professio
 import { NewAppointmentPage } from '../features/appointments/views/NewAppointmentPage';
 import { AppointmentsHistoryPage } from '../features/appointments/views/AppointmentsHistoryPage';
 import { Management } from '../features/management/views/Management';
-import { useAuthStore } from '../auth/auth.store'; // Importamos para la redirección de la raíz
+import { useAuthStore } from '../features/auth/auth.store';
 
 // Placeholders temporales
 const PatientPortalDashboard = () => <div className="p-6">Portal Paciente: Mis Turnos</div>;

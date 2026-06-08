@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import dayjs from 'dayjs';
-import { Clock, AlertCircle, Calendar as CalendarIcon, Sunrise, Sun, Sunset } from 'lucide-react';
+import { Clock, AlertCircle, Sunrise, Sun, Sunset } from 'lucide-react';
 import { useAvailableSlots, useProfessionalSchedules } from '../../hooks/useAppointments';
 import { CustomCalendar } from './CustomCalendar';
 
@@ -59,13 +59,6 @@ export const DateTimeStep = ({ professionalId, onNext, defaultDate, defaultTime 
 
         return groups;
     }, [slots, selectedDate]);
-
-    const handleContinue = () => {
-        if (selectedDate && selectedTime) {
-            const dateTimeISO = dayjs(`${selectedDate}T${selectedTime}:00-03:00`).toISOString();
-            onNext({ date: selectedDate, time: selectedTime, dateTime: dateTimeISO });
-        }
-    };
 
     const hasSlots = slots.length > 0;
 

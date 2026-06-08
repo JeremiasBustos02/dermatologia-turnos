@@ -1,11 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { coveragesService } from '../service/coverages.api';
-
-export interface Coverage {
-  id: number;
-  name: string;
-  description?: string;
-}
+import type { Coverage } from '../../../types';
 
 export const useCoverages = () => {
   return useQuery<Coverage[]>({

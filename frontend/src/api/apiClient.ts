@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useAuthStore } from '../auth/auth.store';
+import { useAuthStore } from '../features/auth/auth.store';
 
 let isRefreshing = false;
 let queue: any[] = [];

@@ -1,11 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { specialtiesService } from '../service/specialties.api';
-
-export interface Specialty {
-  id: number;
-  name: string;
-  description?: string;
-}
+import type { Specialty } from '../../../types';
 
 export const useSpecialties = () => {
   return useQuery<Specialty[]>({

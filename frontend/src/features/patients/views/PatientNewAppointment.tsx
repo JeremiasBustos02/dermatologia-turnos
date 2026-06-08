@@ -5,7 +5,7 @@ import { ProfessionalStep } from '../../appointments/components/wizard/Professio
 import { DateTimeStep } from '../../appointments/components/wizard/DateTimeStep';
 import { SummaryStep } from '../../appointments/components/wizard/SummaryStep';
 import { useCreateAppointment } from '../../appointments/hooks/useAppointments';
-import { useAuthStore } from '../../../auth/auth.store';
+import { useAuthStore } from '../../auth/auth.store';
 import dayjs from 'dayjs';
 
 export interface PatientAppointmentState {
@@ -149,8 +149,6 @@ export const PatientNewAppointment = () => {
             {currentStep === 3 && (
               <SummaryStep 
                 appointmentData={{ ...appointmentData, patientId: user?.userId }} 
-                onConfirm={handleFinalSubmit} 
-                isSubmitting={createMutation.isPending} 
               />
             )}
           </div>
