@@ -1,5 +1,6 @@
-import { CalendarDays, Clock, MapPin, Plus } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { CalendarDays, CheckCircle2, Clock, MapPin, Plus } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { useMyAppointments, useUpdateAppointmentStatus } from '../../appointments/hooks/useAppointments';
 import { useAuthStore } from '../../auth/auth.store';
@@ -8,6 +9,17 @@ import type { Appointment } from '../../appointments/types';
 export const PatientPortalDashboard = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
+  const location = useLocation();
+  const [toast, setToast] = useState<{ show: boolean; message: string }>({ show: false, message: '' });
+
+  useEffect(() => {
+    if (location.state?.showSuccessToast) {
+      setToast({ show: true, message: location.state.toastMessage || 'Turno creado con éxito.' });
+      navigate(location.pathname, { replace: true, state: {} });
+      const timer = setTimeout(() => setToast({ show: false, message: '' }), 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [location, navigate]);
   
   const { data: appointments = [], isLoading } = useMyAppointments();
   const updateStatusMutation = useUpdateAppointmentStatus();
@@ -24,6 +36,27 @@ export const PatientPortalDashboard = () => {
   return (
     <div className="max-w-3xl mx-auto space-y-8 p-4 sm:p-6 min-h-screen">
       
+      {/* Toast de Éxito */}
+      {toast.show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md transition-all duration-300 animate-fade-in">
+          <div className="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center text-center max-w-sm w-full mx-4 border border-slate-100 transform transition-transform animate-in zoom-in-95 duration-200">
+            <div className="w-14 h-14 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mb-3 shadow-xs">
+              <CheckCircle2 size={32} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900">Operación Exitosa</h3>
+            <p className="text-slate-500 text-xs mt-1.5 mb-5 leading-relaxed px-2">
+              {toast.message}
+            </p>
+            <button
+              onClick={() => setToast({ show: false, message: '' })}
+              className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
+            >
+              Cerrar Ventana
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Saludo y Acción Principal */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-blue-600 text-white p-6 rounded-2xl shadow-md">
         <div>

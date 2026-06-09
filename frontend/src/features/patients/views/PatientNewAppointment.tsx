@@ -4,7 +4,7 @@ import { ArrowLeft, Stethoscope, Calendar as CalendarIcon } from 'lucide-react';
 import { ProfessionalStep } from '../../appointments/components/wizard/ProfessionalStep';
 import { DateTimeStep } from '../../appointments/components/wizard/DateTimeStep';
 import { SummaryStep } from '../../appointments/components/wizard/SummaryStep';
-import { useCreateAppointment } from '../../appointments/hooks/useAppointments';
+import { useSelfBooking } from '../../appointments/hooks/useAppointments';
 import { useAuthStore } from '../../auth/auth.store';
 import dayjs from 'dayjs';
 
@@ -27,25 +27,26 @@ export const PatientNewAppointment = () => {
   const [appointmentData, setAppointmentData] = useState<PatientAppointmentState>({});
   const [localError, setLocalError] = useState<string | null>(null);
 
-  const createMutation = useCreateAppointment();
+  const selfBookingMutation = useSelfBooking();
 
   const handleFinalSubmit = () => {
     setLocalError(null);
-    if (!user?.userId || !appointmentData.professionalId || !appointmentData.dateTime) {
+    if (!appointmentData.professionalId || !appointmentData.dateTime) {
       setLocalError('Faltan datos para confirmar el turno.');
       return;
     }
 
-    createMutation.mutate({
-      patientId: user.userId,
+    selfBookingMutation.mutate({
       professionalId: appointmentData.professionalId,
       coverageId: appointmentData.coverageId || 0,
       dateTime: appointmentData.dateTime,
       notes: 'Turno autogestionado desde el Portal del Paciente.',
     }, {
       onSuccess: () => {
-        navigate('/portal/dashboard', { replace: true });
-        alert('¡Turno reservado con éxito! Revisa tu correo para más detalles.');
+        navigate('/portal/dashboard', {
+          replace: true,
+          state: { showSuccessToast: true, toastMessage: '¡Turno reservado con éxito! Revisa tu correo para más detalles.' },
+        });
       },
       onError: (error: any) => {
         const backendError = error.response?.data;
@@ -146,9 +147,10 @@ export const PatientNewAppointment = () => {
                 defaultTime={appointmentData.time}
               />
             )}
-            {currentStep === 3 && (
+            {currentStep === 3 && user && (
               <SummaryStep 
-                appointmentData={{ ...appointmentData, patientId: user?.userId }} 
+                appointmentData={{ ...appointmentData, patientId: user.userId }}
+                patientOverride={{ firstName: user.firstName, lastName: user.lastName, dni: user.dni }}
               />
             )}
           </div>
@@ -165,13 +167,13 @@ export const PatientNewAppointment = () => {
             <button
               type="button"
               onClick={handleNextStep}
-              disabled={!isCurrentStepValid() || createMutation.isPending}
+              disabled={!isCurrentStepValid() || selfBookingMutation.isPending}
               className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-semibold text-xs rounded-lg transition-colors shadow-xs"
             >
-              {createMutation.isPending && (
+              {selfBookingMutation.isPending && (
                 <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
               )}
-              {currentStep === 3 ? (createMutation.isPending ? 'Confirmando...' : 'Confirmar Turno') : 'Continuar'}
+              {currentStep === 3 ? (selfBookingMutation.isPending ? 'Confirmando...' : 'Confirmar Turno') : 'Continuar'}
             </button>
           </div>
         </div>

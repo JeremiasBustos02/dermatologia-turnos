@@ -7,13 +7,14 @@ import type { NewAppointmentState } from '../../hooks/useWizard';
 
 interface SummaryStepProps {
   appointmentData: NewAppointmentState;
+  patientOverride?: { firstName: string; lastName: string; dni: string };
 }
 
-export const SummaryStep = ({ appointmentData }: SummaryStepProps) => {
+export const SummaryStep = ({ appointmentData, patientOverride }: SummaryStepProps) => {
   const { data: patients = [] } = usePatients();
   const { data: professionals = [] } = useProfessionals();
 
-  const patient = patients.find(p => p.id === appointmentData.patientId);
+  const patient = patientOverride ?? patients.find(p => p.id === appointmentData.patientId);
   const professional = professionals.find(p => p.id === appointmentData.professionalId);
   const coverageName = professional?.coverages.find(c => c.id === appointmentData.coverageId)?.name || 'N/A';   
 

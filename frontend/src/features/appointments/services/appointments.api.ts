@@ -34,6 +34,16 @@ export const createAppointment = async (appointment: any) => {
   return data.data ?? data;
 };
 
+export const selfBooking = async (data: {
+  professionalId: number;
+  coverageId: number;
+  dateTime: string;
+  notes?: string;
+}) => {
+  const { data: res } = await apiClient.post('/appointments/self-booking', data);
+  return res.data ?? res;
+};
+
 export const getProfessionalSchedules = async (professionalId: number) => {
   const { data } = await apiClient.get('/schedules', {
     params: { professionalId },

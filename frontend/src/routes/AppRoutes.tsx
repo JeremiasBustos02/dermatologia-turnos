@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { DashboardLayout } from '../layouts/DashboardLayout';
+import { PatientPortalLayout } from '../layouts/PatientPortalLayout';
 import { ProtectedRoute } from './guards/ProtectedRoute';
 import { Dashboard } from '../features/appointments/views/Dashboard';
 import { Login } from '../features/auth/views/Login';
@@ -10,13 +11,10 @@ import { NewAppointmentPage } from '../features/appointments/views/NewAppointmen
 import { AppointmentsHistoryPage } from '../features/appointments/views/AppointmentsHistoryPage';
 import { Management } from '../features/management/views/Management';
 import { SysAdminDashboard } from '../features/clinics/views/SysAdminDashboard';
-import { PatientPortalDashboard } from '../features/patients/views/PatientsPortalDashboard'; // 👈 AGREGÁ ESTA LÍNEA
+import { PatientPortalDashboard } from '../features/patients/views/PatientsPortalDashboard';
+import { PatientNewAppointment } from '../features/patients/views/PatientNewAppointment';
 import { useAuthStore } from '../features/auth/auth.store';
 import { RoleSwitcherDevTool } from '../components/dev/RoleSwitcherDevTool';
-
-
-// Placeholder temporal
-const PatientNewAppointment = () => <div className="p-6">Sacar Turno Online</div>;
 
 export const AppRoutes = () => {
   const user = useAuthStore((state) => state.user);
@@ -61,9 +59,11 @@ export const AppRoutes = () => {
           Totalmente aislado del backoffice
          ========================================================= */}
       <Route element={<ProtectedRoute allowOnlyPatients={true} />}>
-        <Route path="/portal">
-          <Route path="dashboard" element={<PatientPortalDashboard />} />
-          <Route path="appointments/new" element={<PatientNewAppointment />} />
+        <Route element={<PatientPortalLayout />}>
+          <Route path="/portal">
+            <Route path="dashboard" element={<PatientPortalDashboard />} />
+            <Route path="appointments/new" element={<PatientNewAppointment />} />
+          </Route>
         </Route>
       </Route>
 

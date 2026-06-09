@@ -24,7 +24,7 @@ export class ProfessionalsController {
   }
 
   @Get()
-  @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
+  @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.PATIENT)
   findAll(@Query() filters: FilterProfessionalsDto) {
     return this.professionalsService.findAll(filters);
   }

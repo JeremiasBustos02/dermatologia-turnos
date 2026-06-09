@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Req } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { SelfBookingDto } from './dto/self-booking.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { FiltersAppointmentsDto } from './dto/FiltersAppointmentsDto';
 import { GetAvailableSlotsDto } from './dto/get-available-slots.dto';
@@ -19,7 +20,7 @@ export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) { }
 
   @Get('available-slots')
-  @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
+  @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.PATIENT)
   getAvailableSlots(
     @Query() query: GetAvailableSlotsDto,
   ) {
@@ -31,6 +32,19 @@ export class AppointmentsController {
   create(@Body() createAppointmentDto: CreateAppointmentDto, @Req() req: any) {
     const clinicId = req.user.clinicId;
     return this.appointmentsService.create({ ...createAppointmentDto, clinicId });
+  }
+
+  @Post('self-booking')
+  @Roles(UserRole.PATIENT)
+  selfBooking(@Body() dto: SelfBookingDto, @Req() req: any) {
+    return this.appointmentsService.create({
+      patientId: req.user.userId,
+      professionalId: dto.professionalId,
+      coverageId: dto.coverageId,
+      dateTime: dto.dateTime,
+      notes: dto.notes || 'Turno autogestionado desde el Portal del Paciente.',
+      clinicId: req.user.clinicId,
+    });
   }
 
   @Get()

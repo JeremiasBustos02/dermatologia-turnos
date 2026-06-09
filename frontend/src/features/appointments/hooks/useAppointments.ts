@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createAppointment, getAppointments, getMyAppointments, updateAppointmentStatus } from "../services/appointments.api";
+import { createAppointment, getAppointments, getMyAppointments, selfBooking, updateAppointmentStatus } from "../services/appointments.api";
 import type { AppointmentFilters } from "../services/appointments.api";
 import { getAvailableSlots } from '../services/appointments.api';
 
@@ -35,6 +35,17 @@ export const useCreateAppointment = () => {
   });
 };
 
+export const useSelfBooking = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: selfBooking,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['myAppointments'] });
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+    },
+  });
+};
+
 export const useUpdateAppointmentStatus = () => {
   const queryClient = useQueryClient();
   
@@ -42,6 +53,7 @@ export const useUpdateAppointmentStatus = () => {
     mutationFn: updateAppointmentStatus,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['myAppointments'] });
     },
     onError: (error: any) => {
       console.error("Detalle del error al actualizar:", error.response?.data || error.message);
