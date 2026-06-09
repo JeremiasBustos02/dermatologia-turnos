@@ -9,10 +9,10 @@ import { ProfessionalSchedulesPage } from '../features/schedules/views/Professio
 import { NewAppointmentPage } from '../features/appointments/views/NewAppointmentPage';
 import { AppointmentsHistoryPage } from '../features/appointments/views/AppointmentsHistoryPage';
 import { Management } from '../features/management/views/Management';
+import { PatientPortalDashboard } from '../features/patient-portal/views/PatientPortalDashboard';
 import { useAuthStore } from '../auth/auth.store'; // Importamos para la redirección de la raíz
 
-// Placeholders temporales
-const PatientPortalDashboard = () => <div className="p-6">Portal Paciente: Mis Turnos</div>;
+// Placeholder temporal
 const PatientNewAppointment = () => <div className="p-6">Sacar Turno Online</div>;
 
 export const AppRoutes = () => {
