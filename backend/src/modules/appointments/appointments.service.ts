@@ -7,7 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { FiltersAppointmentsDto } from './dto/FiltersAppointmentsDto';
-import { AppointmentStatus, Prisma } from '@prisma/client';
+import { AppointmentStatus, Prisma, UserRole } from '@prisma/client';
 
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -53,7 +53,8 @@ export class AppointmentsService {
     });
   }
 
-  async update(id: number, updateAppointmentDto: UpdateAppointmentDto & { clinicId?: number }) {
+  async update(id: number, updateAppointmentDto: UpdateAppointmentDto & { clinicId?: number }, userId: number, userRole: UserRole) {
+    await this.validateOwnership(id, userId, userRole);
     const appointment = await this.findOne(id);
 
     if (appointment.status === AppointmentStatus.COMPLETED || appointment.status === AppointmentStatus.CANCELLED) {
@@ -322,13 +323,28 @@ export class AppointmentsService {
     return appointment;
   }
 
-  async confirmAppointment(id: number) {
+  private async validateOwnership(appointmentId: number, userId: number, userRole: UserRole): Promise<void> {
+    if (userRole !== UserRole.PATIENT) return;
+
+    const appointment = await this.prisma.appointment.findFirst({
+      where: { id: appointmentId, patientId: userId },
+      select: { id: true },
+    });
+
+    if (!appointment) {
+      throw new NotFoundException(`Turno con ID ${appointmentId} no encontrado.`);
+    }
+  }
+
+  async confirmAppointment(id: number, userId: number, userRole: UserRole) {
+    await this.validateOwnership(id, userId, userRole);
     const appointment = await this.findOne(id);
     if (appointment.status !== AppointmentStatus.PENDING) throw new BadRequestException('Solo se pueden confirmar turnos pendientes.');
     return this.prisma.appointment.update({ where: { id }, data: { status: AppointmentStatus.CONFIRMED } });
   }
 
-  async cancelAppointment(id: number) {
+  async cancelAppointment(id: number, userId: number, userRole: UserRole) {
+    await this.validateOwnership(id, userId, userRole);
     const appointment = await this.findOne(id);
     if (appointment.status === AppointmentStatus.CANCELLED) throw new BadRequestException('El turno ya está cancelado.');
     if (appointment.status === AppointmentStatus.COMPLETED) throw new BadRequestException('No se pueden cancelar turnos completados.');
