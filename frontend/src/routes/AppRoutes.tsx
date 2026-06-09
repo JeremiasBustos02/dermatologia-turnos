@@ -10,6 +10,7 @@ import { NewAppointmentPage } from '../features/appointments/views/NewAppointmen
 import { AppointmentsHistoryPage } from '../features/appointments/views/AppointmentsHistoryPage';
 import { Management } from '../features/management/views/Management';
 import { useAuthStore } from '../features/auth/auth.store';
+import { RoleSwitcherDevTool } from '../components/dev/RoleSwitcherDevTool';
 
 // Placeholders temporales
 const PatientPortalDashboard = () => <div className="p-6">Portal Paciente: Mis Turnos</div>;
@@ -20,7 +21,8 @@ export const AppRoutes = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   return (
-    <Routes>
+    <>
+      <Routes>
       <Route path="/login" element={<Login />} />
 
       {/* =========================================================
@@ -73,5 +75,8 @@ export const AppRoutes = () => {
 
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
+
+      <RoleSwitcherDevTool />
+    </>
   );
 };

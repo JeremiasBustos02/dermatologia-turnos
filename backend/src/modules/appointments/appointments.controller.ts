@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Req } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
@@ -27,14 +27,16 @@ export class AppointmentsController {
 
   @Post()
   @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
-  create(@Body() createAppointmentDto: CreateAppointmentDto) {
-    return this.appointmentsService.create(createAppointmentDto);
+  create(@Body() createAppointmentDto: CreateAppointmentDto, @Req() req: any) {
+    const clinicId = req.user.clinicId;
+    return this.appointmentsService.create({ ...createAppointmentDto, clinicId });
   }
 
   @Get()
   @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
-  findAll(@Query() filters: FiltersAppointmentsDto) {
-    return this.appointmentsService.findAll(filters);
+  findAll(@Query() filters: FiltersAppointmentsDto, @Req() req: any) {
+    const clinicId = req.user.clinicId;
+    return this.appointmentsService.findAll({ ...filters, clinicId });
   }
 
   @Get(':id')
@@ -45,8 +47,13 @@ export class AppointmentsController {
 
   @Patch(':id')
   @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
-  update(@Param('id', PositiveIntPipe) id: number, @Body() updateAppointmentDto: UpdateAppointmentDto) {
-    return this.appointmentsService.update(id, updateAppointmentDto);
+  update(
+    @Param('id', PositiveIntPipe) id: number, 
+    @Body() updateAppointmentDto: UpdateAppointmentDto,
+    @Req() req: any
+  ) {
+    const clinicId = req.user.clinicId;
+    return this.appointmentsService.update(id, { ...updateAppointmentDto, clinicId });
   }
 
   @Patch(':id/confirm')

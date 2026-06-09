@@ -7,10 +7,12 @@ import { SpecialtiesTab } from '../components/tabs/SpecialtiesTab';
 import { CoveragesTab } from '../components/tabs/CoveragesTab';
 import { SlotsTab } from '../components/tabs/SlotsTab';
 import { StaffTab } from '../components/tabs/StaffTab';
+import { useAuthStore } from '../../auth/auth.store';
 
 type TabType = 'specialties' | 'coverages' | 'slots' | 'staff';
 
 export const Management = () => {
+  const clinicId = useAuthStore((state) => state.user?.clinicId);
   const [activeTab, setActiveTab] = useState<TabType>('specialties');
 
   const [isStaffModalOpen, setIsStaffModalOpen] = useState(false);
@@ -38,11 +40,11 @@ export const Management = () => {
     if (!deleteModal.id || !deleteModal.type) return;
 
     if (deleteModal.type === 'spec') {
-      deleteSpecialtyMutation.mutate(deleteModal.id, {
+      deleteSpecialtyMutation.mutate({ id: deleteModal.id, clinicId }, {
         onSuccess: () => setDeleteModal({ open: false, id: null, type: null }),
       });
     } else if (deleteModal.type === 'cov') {
-      deleteCoverageMutation.mutate(deleteModal.id, {
+      deleteCoverageMutation.mutate({ id: deleteModal.id, clinicId }, {
         onSuccess: () => setDeleteModal({ open: false, id: null, type: null }),
       });
     } else if (deleteModal.type === 'staff') {
@@ -104,8 +106,8 @@ export const Management = () => {
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-2xs">
-        {activeTab === 'specialties' && <SpecialtiesTab onDeleteRequest={onDeleteRequest} />}
-        {activeTab === 'coverages' && <CoveragesTab onDeleteRequest={onDeleteRequest} />}
+        {activeTab === 'specialties' && <SpecialtiesTab clinicId={clinicId} onDeleteRequest={onDeleteRequest} />}
+        {activeTab === 'coverages' && <CoveragesTab clinicId={clinicId} onDeleteRequest={onDeleteRequest} />}
         {activeTab === 'slots' && <SlotsTab />}
         {activeTab === 'staff' && (
           <StaffTab

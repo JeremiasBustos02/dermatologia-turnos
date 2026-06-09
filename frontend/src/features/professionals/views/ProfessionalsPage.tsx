@@ -4,9 +4,11 @@ import { ProfessionalsTable } from '../components/ProfessionalsTable';
 import { ProfessionalModal } from '../components/ProfessionalModal';
 import { useProfessionals, useDeleteProfessional, useCreateProfessional, useUpdateProfessional } from '../hooks/useProfessionals';
 import type { Professional, CreateProfessionalDTO } from '../../../types/index';
+import { useAuthStore } from '../../auth/auth.store';
 
 export const ProfessionalsPage = () => {
-  const { data: professionals = [], isLoading, isError } = useProfessionals();
+  const clinicId = useAuthStore((state) => state.user?.clinicId);
+  const { data: professionals = [], isLoading, isError } = useProfessionals(clinicId);
   const deleteMutation = useDeleteProfessional();
   const createMutation = useCreateProfessional(); 
   const updateMutation = useUpdateProfessional();
@@ -16,7 +18,7 @@ export const ProfessionalsPage = () => {
 
   const handleDelete = (id: number) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este profesional?')) {
-      deleteMutation.mutate(id);
+      deleteMutation.mutate({ id, clinicId });
     }
   };
 
@@ -36,7 +38,8 @@ export const ProfessionalsPage = () => {
       lastName: data.lastName,
       licenseNumber: data.licenseNumber || undefined,
       specialtyIds: Array.isArray(data.specialtyIds) ? data.specialtyIds.map(Number) : [],
-      coverageIds: Array.isArray(data.coverageIds) ? data.coverageIds.map(Number) : []
+      coverageIds: Array.isArray(data.coverageIds) ? data.coverageIds.map(Number) : [],
+      clinicId,
     };
 
     if (professionalToEdit) {

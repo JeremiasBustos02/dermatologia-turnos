@@ -25,6 +25,7 @@ export interface CreateProfessionalDTO {
   licenseNumber: string;
   specialtyIds: [];
   coverageIds: [];
+  clinicId: number;
 }
 
 export interface Patient {
@@ -42,6 +43,7 @@ export interface CreatePatientDTO {
   lastName: string;
   email: string;
   coverageId?: number | null;
+  clinicId: number;
 }
 
 export interface Specialty {

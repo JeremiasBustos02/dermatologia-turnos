@@ -1,7 +1,8 @@
 import { X, Activity, Calendar as CalendarIcon, Stethoscope, Pill, FileText, User } from 'lucide-react';
 import dayjs from 'dayjs';
-import 'dayjs/locale/es'; // Para fechas en español si lo usas
+import 'dayjs/locale/es';
 import { useMedicalRecordsByPatient } from '../hooks/useMedicalRecords';
+import { useAuthStore } from '../../auth/auth.store';
 
 interface PatientHistoryDrawerProps {
   isOpen: boolean;
@@ -10,7 +11,8 @@ interface PatientHistoryDrawerProps {
 }
 
 export const PatientHistoryDrawer = ({ isOpen, onClose, patient }: PatientHistoryDrawerProps) => {
-  const { data: records = [], isLoading, isError } = useMedicalRecordsByPatient(patient?.id);
+  const clinicId = useAuthStore((state) => state.user?.clinicId);
+  const { data: records = [], isLoading, isError } = useMedicalRecordsByPatient(patient?.id, clinicId);
 
   if (!isOpen || !patient) return null;
 

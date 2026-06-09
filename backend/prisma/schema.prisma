@@ -21,6 +21,10 @@ model User {
   updatedAt           DateTime        @default(now()) @updatedAt
   deletedAt           DateTime?
   hashedRefreshToken  String?
+
+  clinicId            Int?
+  clinic              Clinic?          @relation(fields: [clinicId], references: [id])
+
   coverageId          Int?
   appointments        Appointment[]   @relation("PatientAppointments")
   medicalRecords      MedicalRecord[] @relation("PatientMedicalRecords")
@@ -29,6 +33,7 @@ model User {
 
   @@index([coverageId])
   @@index([deletedAt])
+  @@index([clinicId])
 }
 
 model Professional {
@@ -86,6 +91,7 @@ model Coverage {
   appointments  Appointment[]
   users         User[]
   professionals Professional[] @relation("CoverageToProfessional")
+  clinics       Clinic[]       @relation("ClinicToCoverage")
 }
 
 model Schedule {
@@ -106,6 +112,10 @@ model Appointment {
   patientId      Int
   professionalId Int
   coverageId     Int
+
+  clinicId       Int
+  clinic         Clinic            @relation(fields: [clinicId], references: [id])
+
   dateTime       DateTime
   status         AppointmentStatus @default(PENDING)
   notes          String?
@@ -120,6 +130,21 @@ model Appointment {
   @@index([patientId])
   @@index([coverageId])
   @@index([dateTime])
+  @@index([clinicId])
+  @@index([clinicId, dateTime])
+}
+
+model Clinic {
+  id           Int           @id @default(autoincrement())
+  name         String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @default(now()) @updatedAt
+  deletedAt    DateTime?
+  users        User[]
+  appointments Appointment[]
+  coverages    Coverage[]    @relation("ClinicToCoverage")
+
+  @@index([deletedAt])
 }
 
 enum UserRole {

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Trash2, Calendar, Save, CheckSquare, Square } from 'lucide-react';
 import { useProfessionalSchedules, useSaveProfessionalSchedules } from '../hooks/useSchedules';
 import type { DayOfWeek } from '../types';
+import { useAuthStore } from '../../auth/auth.store';
 
 const DAYS_TRANSLATION: Record<DayOfWeek, string> = {
   MONDAY: 'Lunes',
@@ -35,9 +36,10 @@ export const ProfessionalSchedulesPage = () => {
   const { id } = useParams<{ id: string }>();
   const professionalId = Number(id);
   const navigate = useNavigate();
+  const clinicId = useAuthStore((state) => state.user?.clinicId);
 
-  const { data: serverSchedules, isLoading, isError } = useProfessionalSchedules(professionalId);
-  const saveMutation = useSaveProfessionalSchedules(professionalId);
+  const { data: serverSchedules, isLoading, isError } = useProfessionalSchedules(professionalId, clinicId);
+  const saveMutation = useSaveProfessionalSchedules(professionalId, clinicId);
 
   // Estado de la grilla final
   const [rows, setRows] = useState<LocalScheduleRow[]>([]);

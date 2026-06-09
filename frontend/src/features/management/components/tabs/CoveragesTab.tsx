@@ -4,16 +4,17 @@ import { useCoverages, useCreateCoverage } from '../../hooks/useCoverages';
 import { CoverageModal } from '../CoverageModal';
 
 interface CoveragesTabProps {
+  clinicId?: number;
   onDeleteRequest: (id: number, type: 'cov') => void;
 }
 
-export const CoveragesTab = ({ onDeleteRequest }: CoveragesTabProps) => {
+export const CoveragesTab = ({ clinicId, onDeleteRequest }: CoveragesTabProps) => {
   const [isCovModalOpen, setIsCovModalOpen] = useState(false);
-  const { data: coverages = [], isLoading: isLoadingCovs } = useCoverages();
+  const { data: coverages = [], isLoading: isLoadingCovs } = useCoverages(clinicId);
   const createCoverageMutation = useCreateCoverage();
 
   const handleCovSubmit = (data: { name: string; description: string }) => {
-    createCoverageMutation.mutate(data, { onSuccess: () => setIsCovModalOpen(false) });
+    createCoverageMutation.mutate({ ...data, clinicId: clinicId! }, { onSuccess: () => setIsCovModalOpen(false) });
   };
 
   const coveragesList = Array.isArray(coverages) ? coverages : [];

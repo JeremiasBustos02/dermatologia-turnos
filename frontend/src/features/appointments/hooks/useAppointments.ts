@@ -10,10 +10,10 @@ export const useAppointments = (filters?: AppointmentFilters) => {
   });
 };
 
-export const useAvailableSlots = (professionalId: number, date: string) => {
+export const useAvailableSlots = (professionalId: number, date: string, clinicId?: number) => {
   return useQuery({
-    queryKey: ['availableSlots', professionalId, date],
-    queryFn: () => getAvailableSlots(professionalId, date),
+    queryKey: ['availableSlots', professionalId, date, clinicId],
+    queryFn: () => getAvailableSlots(professionalId, date, clinicId),
     enabled: !!professionalId && !!date, 
   });
 };

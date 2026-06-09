@@ -6,6 +6,8 @@ export type AppointmentFilters = {
   patientId?: number;
   professionalId?: number;
   coverageId?: number;
+  notes?: string;
+  clinicId?: number;
 };
 
 export const getAppointments = async (filters?: AppointmentFilters) => {
@@ -16,9 +18,9 @@ export const getAppointments = async (filters?: AppointmentFilters) => {
   return data.data ?? data;
 };
 
-export const getAvailableSlots = async (professionalId: number, date: string): Promise<string[]> => {
+export const getAvailableSlots = async (professionalId: number, date: string, clinicId?: number): Promise<string[]> => {
   const { data } = await apiClient.get('/appointments/available-slots', {
-    params: { professionalId, date },
+    params: { professionalId, date, clinicId },
   });
   return data.data ?? data;
 };
@@ -28,14 +30,14 @@ export const createAppointment = async (appointment: any) => {
   return data.data ?? data;
 };
 
-export const getProfessionalSchedules = async (professionalId: number) => {
+export const getProfessionalSchedules = async (professionalId: number, clinicId?: number) => {
   const { data } = await apiClient.get('/schedules', {
-    params: { professionalId },
+    params: { professionalId, clinicId },
   });
   return data.data ?? data;
 };
 
-export const updateAppointmentStatus = async ({ id, status }: { id: number, status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' }) => {
+export const updateAppointmentStatus = async ({ id, status, clinicId }: { id: number, status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED', clinicId?: number }) => {
   let endpoint = `/appointments/${id}`; 
   
   if (status === 'COMPLETED') {
@@ -46,7 +48,7 @@ export const updateAppointmentStatus = async ({ id, status }: { id: number, stat
     endpoint = `/appointments/${id}/confirm`;
   }
 
-  const { data } = await apiClient.patch(endpoint);
+  const { data } = await apiClient.patch(endpoint, null, { params: { clinicId } });
   
   return data.data ?? data;
 };

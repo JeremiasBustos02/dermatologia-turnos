@@ -3,6 +3,7 @@ import { User, UserPlus } from 'lucide-react';
 import { usePatients } from '../../../patients/hooks/usePatients';
 import { SearchablePicker } from '../../../../components/shared/SearchablePicker';
 import type { Patient } from '../../../../types/index';
+import { useAuthStore } from '../../../auth/auth.store';
 
 interface PatientStepProps {
   onNext: (patientId: number) => void;
@@ -10,7 +11,8 @@ interface PatientStepProps {
 }
 
 export const PatientStep = ({ onNext, defaultSelected }: PatientStepProps) => {
-  const { data: patients = [], isLoading, isError } = usePatients();
+  const clinicId = useAuthStore((state) => state.user?.clinicId);
+  const { data: patients = [], isLoading, isError } = usePatients(clinicId);
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredPatients = (patients as Patient[]).filter(p => 
@@ -20,33 +22,38 @@ export const PatientStep = ({ onNext, defaultSelected }: PatientStepProps) => {
   );
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-base font-bold text-slate-800">1. Selecciona un paciente</h2>
-          <p className="text-xs text-slate-400 font-medium">Buscá al paciente en la base de datos de la clínica.</p>
-        </div>
+    <div className="space-y-6">
+      <div className="border-b border-slate-100 pb-3">
+        <h2 className="text-lg font-bold text-slate-800">1. Selecciona un paciente</h2>
+        <p className="text-sm text-slate-400 font-medium">Buscá al paciente en la base de datos de la clínica para iniciar la reserva.</p>
+      </div>
+
+      <div className="w-auto mt-4">
         <SearchablePicker
           items={filteredPatients}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           selectedId={defaultSelected}
           onSelect={(patient) => onNext(patient.id)}
-          searchPlaceholder="Buscar por DNI o apellido..."
+          searchPlaceholder="Buscar paciente por DNI o apellido..."
           isLoading={isLoading}
           isError={isError}
-          loadingMessage="Cargando pacientes..."
+          loadingMessage="Cargando padrón de pacientes..."
           errorMessage="Error al cargar el padrón."
-          emptyMessage="No se encontraron pacientes."
+          emptyMessage="No se encontraron pacientes con ese criterio."
           emptyIcon={<UserPlus size={28} />}
+          maxHeight="300px"
           renderItem={(patient, isSelected) => (
             <>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors flex-shrink-0 ${isSelected ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
-                <User size={14} />
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors flex-shrink-0 ${isSelected ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
+                <User size={18} />
               </div>
-              <div className="min-w-0">
-                <p className={`text-xs font-semibold truncate ${isSelected ? 'text-blue-900' : 'text-slate-800'}`}>{patient.firstName} {patient.lastName}</p>
-                <p className="text-[11px] text-slate-400 mt-0.5 truncate">DNI: {patient.dni} • {patient.email || 'Sin correo registrado'}</p>
+              <div className="min-w-0 flex-1">
+                <p className={`text-sm font-semibold truncate ${isSelected ? 'text-blue-900' : 'text-slate-800'}`}>{patient.firstName} {patient.lastName}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-[11px] font-medium px-2 py-0.5 bg-slate-100 text-slate-500 rounded-md">DNI: {patient.dni}</span>
+                  <span className="text-[11px] text-slate-400 truncate">{patient.email || 'Sin correo registrado'}</span>
+                </div>
               </div>
             </>
           )}

@@ -1,11 +1,12 @@
 import { create } from 'zustand';
-import { type User , type AuthState } from './auth.types';
+import { type User, type UserRole, type AuthState } from './auth.types';
 
 interface AuthActions {
   setSession: (token: string, user: User) => void;
   setToken: (token: string) => void;
   logout: () => void;
   setLoading: (value: boolean) => void;
+  setMockRole: (role: UserRole) => void;
 }
 
 export const useAuthStore = create<AuthState & AuthActions>((set) => ({
@@ -31,6 +32,20 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
   },
 
   setLoading: (value) => set({ isLoading: value }),
+
+  setMockRole: (role) =>
+    set((state) => ({
+      user: state.user
+        ? { ...state.user, role }
+        : {
+            userId: 0,
+            dni: 'mock',
+            role,
+            firstName: 'Mock',
+            lastName: 'User',
+            clinicId: 1,
+          },
+    })),
 
   logout: () => {
     localStorage.removeItem('accessToken');

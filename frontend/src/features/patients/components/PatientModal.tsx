@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { X } from 'lucide-react';
-import type { CreatePatientDTO, Patient } from '../../../types/index'; // <-- CreatePatientDTO ya se usa aquí
+import type { CreatePatientDTO, Patient } from '../../../types/index';
 import { useCoverages } from '../../management/hooks/useCoverages';
+import { useAuthStore } from '../../auth/auth.store';
 
 interface PatientModalProps {
   isOpen: boolean;
@@ -11,13 +12,13 @@ interface PatientModalProps {
   patientToEdit?: Patient | null;
 }
 
-// Declaramos la estructura del formulario de forma estricta para complacer a TypeScript
 interface PatientFormValues extends Omit<CreatePatientDTO, 'coverageId'> {
   coverageId: string | number;
 }
 
 export const PatientModal = ({ isOpen, onClose, onSubmit, patientToEdit }: PatientModalProps) => {
-  const { data: coverages = [], isLoading: isLoadingCovs } = useCoverages();
+  const clinicId = useAuthStore((state) => state.user?.clinicId);
+  const { data: coverages = [], isLoading: isLoadingCovs } = useCoverages(clinicId);
 
   // Le pasamos el tipo al hook para que reconozca los mensajes de error como strings válidos
   const { register, handleSubmit, reset, formState: { errors } } = useForm<PatientFormValues>({

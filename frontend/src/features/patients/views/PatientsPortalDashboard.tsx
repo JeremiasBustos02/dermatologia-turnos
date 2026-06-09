@@ -8,8 +8,9 @@ import type { Appointment } from '../../appointments/types';
 export const PatientPortalDashboard = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
+  const clinicId = user?.clinicId;
   
-  const { data: appointments = [], isLoading } = useAppointments({ patientId: user?.userId });
+  const { data: appointments = [], isLoading } = useAppointments({ patientId: user?.userId, clinicId });
   const updateStatusMutation = useUpdateAppointmentStatus();
 
   const typedAppointments = appointments as Appointment[];

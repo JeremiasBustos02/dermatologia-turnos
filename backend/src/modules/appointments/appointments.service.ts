@@ -24,7 +24,8 @@ type BookingClient = Pick<PrismaService, 'user' | 'professional' | 'schedule' | 
 export class AppointmentsService {
   constructor(private prisma: PrismaService) { }
 
-  async create(dto: CreateAppointmentDto) {
+  // 🌟 SOLUCIÓN: Agregamos el tipo de intersección para que TypeScript sepa que clinicId viene en el DTO/Request
+  async create(dto: CreateAppointmentDto & { clinicId: number }) {
     const appointmentDate = new Date(dto.dateTime);
     this.validateAppointmentDateSync(appointmentDate);
 
@@ -33,6 +34,7 @@ export class AppointmentsService {
         dto.patientId,
         dto.professionalId,
         dto.coverageId,
+        dto.clinicId, // 👈 Pasado correctamente como number
         appointmentDate,
         undefined,
         tx,
@@ -43,6 +45,7 @@ export class AppointmentsService {
           patientId: dto.patientId,
           professionalId: dto.professionalId,
           coverageId: dto.coverageId,
+          clinicId: dto.clinicId, // 👈 Ya no tira error de propiedad faltante
           dateTime: appointmentDate,
           notes: dto.notes,
         },
@@ -50,7 +53,7 @@ export class AppointmentsService {
     });
   }
 
-  async update(id: number, updateAppointmentDto: UpdateAppointmentDto) {
+  async update(id: number, updateAppointmentDto: UpdateAppointmentDto & { clinicId?: number }) {
     const appointment = await this.findOne(id);
 
     if (appointment.status === AppointmentStatus.COMPLETED || appointment.status === AppointmentStatus.CANCELLED) {
@@ -60,6 +63,10 @@ export class AppointmentsService {
     const patientId = updateAppointmentDto.patientId ?? appointment.patientId;
     const professionalId = updateAppointmentDto.professionalId ?? appointment.professionalId;
     const coverageId = updateAppointmentDto.coverageId ?? appointment.coverageId;
+    
+    // Resolvemos el clinicId del DTO o usamos el que ya tenía el turno originalmente
+    const clinicId = updateAppointmentDto.clinicId ?? appointment.clinicId;
+
     const appointmentDate = updateAppointmentDto.dateTime
       ? new Date(updateAppointmentDto.dateTime)
       : appointment.dateTime;
@@ -67,12 +74,14 @@ export class AppointmentsService {
     this.validateAppointmentDateSync(appointmentDate);
 
     return this.prisma.$transaction(async (tx) => {
+      // 🌟 SOLUCIÓN AL ERROR 3: Reordenamos los parámetros para que coincidan con la firma de la función
       await this.validateAllBookingRules(
         patientId,
         professionalId,
         coverageId,
-        appointmentDate,
-        id,
+        clinicId,        // 4° parámetro: clinicId (number) ✅
+        appointmentDate, // 5° parámetro: appointmentDate (Date) ✅
+        id,              // 6° parámetro: ignoreAppointmentId (number) ✅
         tx,
       );
 
@@ -93,7 +102,8 @@ export class AppointmentsService {
     patientId: number,
     professionalId: number,
     coverageId: number,
-    appointmentDate: Date,
+    clinicId: number, // 👈 4° parámetro
+    appointmentDate: Date, // 👈 5° parámetro
     ignoreAppointmentId?: number,
     tx: BookingClient = this.prisma,
   ) {
@@ -103,10 +113,13 @@ export class AppointmentsService {
 
     // Disparamos TODAS las peticiones a la Base de Datos AL MISMO TIEMPO
     const [patient, professional, schedules, existingAppointment] = await Promise.all([
-      tx.user.findUnique({ where: { id: patientId }, select: { id: true, role: true } }),
+      tx.user.findUnique({ 
+        where: { id: patientId }, 
+        select: { id: true, role: true, clinicId: true } 
+      }),
       tx.professional.findUnique({
         where: { id: professionalId },
-        select: { id: true, coverages: { select: { id: true } } },
+        select: { id: true, coverages: { select: { id: true } }, user: { select: { clinicId: true } } },
       }),
       tx.schedule.findMany({
         where: { professionalId, dayOfWeek: appointmentDay },
@@ -119,6 +132,7 @@ export class AppointmentsService {
       }),
       tx.appointment.findFirst({
         where: {
+          clinicId, // 👈 Agregado para el aislamiento multi-tenant
           professionalId,
           dateTime: appointmentDate,
           status: { not: 'CANCELLED' },
@@ -130,9 +144,12 @@ export class AppointmentsService {
     // 1. Validar Paciente
     if (!patient) throw new NotFoundException(`Paciente con ID ${patientId} no encontrado.`);
     if (patient.role !== 'PATIENT') throw new BadRequestException('El usuario seleccionado no es un paciente.');
+    if (patient.clinicId !== clinicId) throw new BadRequestException('El paciente no pertenece a esta clínica.');
 
     // 2. Validar Profesional y Cobertura (En memoria)
     if (!professional) throw new NotFoundException(`Profesional con ID ${professionalId} no encontrado.`);
+    if (professional.user?.clinicId !== clinicId) throw new BadRequestException('El profesional no pertenece a esta clínica.');
+    
     const acceptsCoverage = professional.coverages.some((c) => c.id === coverageId);
     if (!acceptsCoverage) throw new BadRequestException('El profesional no acepta esa cobertura médica.');
 
@@ -170,7 +187,6 @@ export class AppointmentsService {
     const startOfDay = localTargetDate.startOf('day').toDate();
     const endOfDay = localTargetDate.endOf('day').toDate();
 
-    // 🌟 Disparamos en paralelo la validación, la grilla y los turnos ocupados
     const [professional, schedules, appointments] = await Promise.all([
       this.prisma.professional.findUnique({ where: { id: professionalId }, select: { id: true } }),
       this.prisma.schedule.findMany({
@@ -233,9 +249,9 @@ export class AppointmentsService {
   }
 
   // =====================================================================
-  // LISTADOS Y GESTIÓN DE ESTADOS (Ya optimizados previamente)
+  // LISTADOS Y GESTIÓN DE ESTADOS
   // =====================================================================
-  async findAll(filters: FiltersAppointmentsDto) {
+  async findAll(filters: FiltersAppointmentsDto & { clinicId?: number }) { // 👈 Tipado dinámico para filtrar opcionalmente por clínica
     const start = performance.now();
     const { page = 1, limit = 10, ...queryFilters } = filters;
     const skip = (page - 1) * limit;
@@ -255,6 +271,7 @@ export class AppointmentsService {
       : undefined;
 
     const whereCondition = {
+      clinicId: queryFilters.clinicId, // 👈 Agregamos el filtro en el listado general
       patientId: queryFilters.patientId,
       professionalId: queryFilters.professionalId,
       coverageId: queryFilters.coverageId,
@@ -270,7 +287,7 @@ export class AppointmentsService {
         take: limit,
         orderBy: { dateTime: 'asc' },
         select: {
-          id: true, patientId: true, professionalId: true, coverageId: true, dateTime: true, status: true, notes: true, createdAt: true,
+          id: true, clinicId: true, patientId: true, professionalId: true, coverageId: true, dateTime: true, status: true, notes: true, createdAt: true,
           patient: { select: { id: true, firstName: true, lastName: true, dni: true, email: true } },
           professional: { select: { id: true, firstName: true, lastName: true, licenseNumber: true } },
           coverage: { select: { id: true, name: true } },
@@ -288,6 +305,7 @@ export class AppointmentsService {
       where: { id },
       select: {
         id: true,
+        clinicId: true, // 👈 Agregado
         patientId: true,
         professionalId: true,
         coverageId: true,
@@ -295,7 +313,7 @@ export class AppointmentsService {
         status: true,
         notes: true,
         createdAt: true,
-        patient: { select: { id: true, firstName: true, lastName: true, dni: true, email: true } },
+        patient: { select: { id: true, firstName: true, lastName: true, dni: true, email: true, clinicId: true } },
         professional: { select: { id: true, firstName: true, lastName: true, licenseNumber: true } },
         coverage: { select: { id: true, name: true } },
       },

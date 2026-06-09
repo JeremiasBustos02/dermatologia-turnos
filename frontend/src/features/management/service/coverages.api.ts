@@ -2,9 +2,9 @@ import { apiClient } from '../../../api/apiClient';
 import type { Coverage } from '../../../types';
 
 export const coveragesService = {
-  getAll: async (): Promise<Coverage[]> => {
+  getAll: async (clinicId?: number): Promise<Coverage[]> => {
     try {
-      const { data } = await apiClient.get('/coverages');
+      const { data } = await apiClient.get('/coverages', { params: { clinicId } });
 
       if (data && typeof data === 'object' && Array.isArray(data.data)) {
         return data.data;
@@ -21,12 +21,12 @@ export const coveragesService = {
     }
   },
 
-  create: async (newCoverage: Omit<Coverage, 'id'>): Promise<Coverage> => {
+  create: async (newCoverage: Omit<Coverage, 'id'> & { clinicId: number }): Promise<Coverage> => {
     const { data } = await apiClient.post('/coverages', newCoverage);
     return data;
   },
 
-  delete: async (id: number): Promise<void> => {
-    await apiClient.delete(`/coverages/${id}`);
+  delete: async (id: number, clinicId?: number): Promise<void> => {
+    await apiClient.delete(`/coverages/${id}`, { params: { clinicId } });
   }
 };

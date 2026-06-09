@@ -3,6 +3,7 @@ import { X, FileText, Stethoscope, Pill } from 'lucide-react';
 import type { Appointment } from '../types';
 import { useCreateMedicalRecord } from '../hooks/useMedicalRecords';
 import { useUpdateAppointmentStatus } from '../hooks/useAppointments';
+import { useAuthStore } from '../../auth/auth.store';
 
 interface MedicalRecordModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface MedicalRecordModalProps {
 }
 
 export const MedicalRecordModal = ({ isOpen, onClose, appointment }: MedicalRecordModalProps) => {
+  const clinicId = useAuthStore((state) => state.user?.clinicId);
   const [reason, setReason] = useState('');
   const [evolution, setEvolution] = useState('');
   const [prescription, setPrescription] = useState('');
@@ -30,7 +32,6 @@ export const MedicalRecordModal = ({ isOpen, onClose, appointment }: MedicalReco
       return;
     }
 
-    // 1. Guardamos la evolución clínica
     createRecordMutation.mutate(
       {
         patientId: appointment.patient.id,
@@ -39,12 +40,12 @@ export const MedicalRecordModal = ({ isOpen, onClose, appointment }: MedicalReco
         reason: reason.trim() || undefined,
         evolution: evolution.trim(),
         prescription: prescription.trim() || undefined,
+        clinicId: clinicId!,
       },
       {
         onSuccess: () => {
-          // 2. Si se guardó bien, cerramos el turno (lo pasamos a COMPLETED)
           updateStatusMutation.mutate(
-            { id: appointment.id, status: 'COMPLETED' },
+            { id: appointment.id, status: 'COMPLETED', clinicId },
             {
               onSuccess: () => {
                 handleClose();

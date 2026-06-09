@@ -8,6 +8,7 @@ export interface CreateMedicalRecordDTO {
   reason?: string;
   evolution: string;
   prescription?: string;
+  clinicId: number;
 }
 
 export const useCreateMedicalRecord = () => {
@@ -25,16 +26,15 @@ export const useCreateMedicalRecord = () => {
   });
 };
 
-export const useMedicalRecordsByPatient = (patientId?: number) => {
+export const useMedicalRecordsByPatient = (patientId?: number, clinicId?: number) => {
   return useQuery({
-    queryKey: ['medical-records', 'patient', patientId],
+    queryKey: ['medical-records', 'patient', patientId, clinicId],
     queryFn: async () => {
-      // Pedimos los registros del paciente. Puedes ajustar el límite si quieres.
       const { data } = await apiClient.get('/medical-records', {
-        params: { patientId, limit: 20 },
+        params: { patientId, clinicId, limit: 20 },
       });
-      return data.data; // Retornamos el array que viene dentro del objeto de paginación
+      return data.data;
     },
-    enabled: !!patientId, // Solo se ejecuta si le pasamos un ID válido
+    enabled: !!patientId,
   });
 };

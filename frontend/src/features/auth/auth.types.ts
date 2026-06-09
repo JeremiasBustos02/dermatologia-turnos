@@ -1,4 +1,4 @@
-export type UserRole = 'ADMIN' | 'PATIENT' | 'RECEPTIONIST';
+import type { UserRole } from '../../types';
 
 export interface User {
   userId: number;
@@ -6,6 +6,7 @@ export interface User {
   role: UserRole;
   firstName: string;
   lastName: string;
+  clinicId: number;
 }
 
 export interface AuthState {

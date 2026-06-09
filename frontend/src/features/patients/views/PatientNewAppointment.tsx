@@ -22,6 +22,7 @@ const STEPS = ['Especialista', 'Fecha y Hora', 'Confirmación'];
 export const PatientNewAppointment = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
+  const clinicId = user?.clinicId;
   
   const [currentStep, setCurrentStep] = useState(1);
   const [appointmentData, setAppointmentData] = useState<PatientAppointmentState>({});
@@ -37,11 +38,12 @@ export const PatientNewAppointment = () => {
     }
 
     createMutation.mutate({
-      patientId: user.userId, // ID inyectado automáticamente
+      patientId: user.userId,
       professionalId: appointmentData.professionalId,
-      coverageId: appointmentData.coverageId || 0, // Asume 0 o null si el endpoint lo permite
+      coverageId: appointmentData.coverageId || 0,
       dateTime: appointmentData.dateTime,
-      notes: 'Turno autogestionado desde el Portal del Paciente.'
+      notes: 'Turno autogestionado desde el Portal del Paciente.',
+      clinicId,
     }, {
       onSuccess: () => {
         navigate('/portal/dashboard', { replace: true });
