@@ -1,4 +1,4 @@
-export type UserRole = 'ADMIN' | 'RECEPTIONIST' | 'PROFESSIONAL' | 'PATIENT';
+export type UserRole = 'SUPERADMIN' | 'ADMIN' | 'RECEPTIONIST' | 'PROFESSIONAL' | 'PATIENT';
 
 export interface User {
   id: number;
@@ -25,6 +25,7 @@ export interface CreateProfessionalDTO {
   licenseNumber: string;
   specialtyIds: [];
   coverageIds: [];
+  clinicId: number;
 }
 
 export interface Patient {
@@ -42,16 +43,19 @@ export interface CreatePatientDTO {
   lastName: string;
   email: string;
   coverageId?: number | null;
+  clinicId: number;
 }
 
 export interface Specialty {
   id: number;
   name: string;
+  description?: string;
 }
 
 export interface Coverage {
   id: number;
   name: string;
+  description?: string;
 }
 
 export interface AuthResponse {

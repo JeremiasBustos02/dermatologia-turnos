@@ -1,25 +1,15 @@
 import { useState } from 'react';
 import dayjs from 'dayjs';
-import { CalendarDays, Search, CheckCircle, XCircle, CalendarCheck, AlertTriangle } from 'lucide-react';
+import { CalendarDays, Search, CheckCircle, XCircle, CalendarCheck } from 'lucide-react';
 import { useAppointments, useUpdateAppointmentStatus } from '../hooks/useAppointments';
 import type { Appointment } from '../types';
-
-const statusColors = {
-  PENDING: 'bg-amber-50 text-amber-700 border-amber-200',
-  CONFIRMED: 'bg-blue-50 text-blue-700 border-blue-200',
-  COMPLETED: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  CANCELLED: 'bg-rose-50 text-rose-700 border-rose-200',
-};
-
-const statusTranslations = {
-  PENDING: 'Pendiente',
-  CONFIRMED: 'Confirmado',
-  COMPLETED: 'Completado',
-  CANCELLED: 'Cancelado',
-};
+import { StatusBadge } from '../../../components/shared/StatusBadge';
+import { ConfirmDialog } from '../../../components/shared/ConfirmDialog';
+import { useAuthStore } from '../../auth/auth.store';
 
 export const AppointmentsHistoryPage = () => {
-  const { data: appointments = [], isLoading, isError } = useAppointments();
+  const clinicId = useAuthStore((state) => state.user?.clinicId);
+  const { data: appointments = [], isLoading, isError } = useAppointments({ clinicId });
   const updateStatusMutation = useUpdateAppointmentStatus();
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -55,34 +45,15 @@ export const AppointmentsHistoryPage = () => {
   return (
     <div className="max-w-6xl mx-auto space-y-6 relative">
       
-      {/* Modal Controlado de Cancelación Seguro */}
-      {cancelModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs">
-          <div className="bg-white p-5 rounded-xl shadow-xl max-w-sm w-full mx-4 border border-slate-200 animate-in zoom-in-95 duration-150">
-            <div className="flex items-center gap-3 text-amber-600 mb-3">
-              <div className="p-2 bg-amber-50 rounded-lg"><AlertTriangle size={20} /></div>
-              <h3 className="text-sm font-bold text-slate-900">¿Confirmas la cancelación?</h3>
-            </div>
-            <p className="text-xs text-slate-500 leading-relaxed mb-5">
-              Esta acción liberará el espacio de la agenda del médico y notificará al paciente sobre la baja del turno.
-            </p>
-            <div className="flex justify-end gap-2 text-xs font-semibold">
-              <button
-                onClick={() => setCancelModal({ open: false, id: null })}
-                className="px-3 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 transition-colors"
-              >
-                Ignorar
-              </button>
-              <button
-                onClick={confirmCancellation}
-                className="px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-colors shadow-xs"
-              >
-                Sí, Cancelar Turno
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        isOpen={cancelModal.open}
+        title="¿Confirmas la cancelación?"
+        description="Esta acción liberará el espacio de la agenda del médico y notificará al paciente sobre la baja del turno."
+        confirmLabel="Sí, Cancelar Turno"
+        cancelLabel="Ignorar"
+        onConfirm={confirmCancellation}
+        onCancel={() => setCancelModal({ open: false, id: null })}
+      />
 
       {/* Barra superior de herramientas */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
@@ -156,9 +127,7 @@ export const AppointmentsHistoryPage = () => {
                         {appointment.professional.firstName} {appointment.professional.lastName}
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-0.5 rounded-md border text-[10px] font-bold uppercase tracking-wider ${statusColors[appointment.status]}`}>
-                          {statusTranslations[appointment.status]}
-                        </span>
+                        <StatusBadge status={appointment.status} />
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex justify-center gap-1.5">

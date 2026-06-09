@@ -6,7 +6,6 @@ import {
   Delete,
   Body,
   Param,
-  ParseIntPipe,
   Query,
 } from '@nestjs/common';
 import { SchedulesService } from './schedules.service';
@@ -15,6 +14,7 @@ import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { FilterSchedulesDto } from './dto/FiltersSchedulesDto';
 import { UpdateProfessionalSchedulesDto } from './dto/update-professional-schedules.dto';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { PositiveIntPipe } from 'src/common/pipes/positive-int.pipe';
 
 @ApiTags('Schedules')
 @Controller('schedules')
@@ -35,14 +35,14 @@ export class SchedulesController {
 
   @ApiOperation({ summary: 'Obtener un horario específico por su ID' })
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id', PositiveIntPipe) id: number) {
     return this.schedulesService.findOne(id);
   }
 
   @ApiOperation({ summary: 'Actualizar un horario individual' })
   @Put(':id')
   update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', PositiveIntPipe) id: number,
     @Body() updateScheduleDto: UpdateScheduleDto,
   ) {
     return this.schedulesService.update(id, updateScheduleDto);
@@ -50,7 +50,7 @@ export class SchedulesController {
 
   @ApiOperation({ summary: 'Eliminar un horario específico' })
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
+  remove(@Param('id', PositiveIntPipe) id: number) {
     return this.schedulesService.remove(id);
   }
 
@@ -60,7 +60,7 @@ export class SchedulesController {
   @ApiOperation({ summary: 'Reemplazar la grilla semanal completa de un profesional' })
   @Post('professional/:professionalId')
   replaceProfessionalSchedules(
-    @Param('professionalId', ParseIntPipe) professionalId: number,
+    @Param('professionalId', PositiveIntPipe) professionalId: number,
     @Body() dto: UpdateProfessionalSchedulesDto,
   ) {
     return this.schedulesService.replaceProfessionalSchedules(professionalId, dto);

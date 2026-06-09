@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
-import { useAuthStore } from '../auth/auth.store';
+import { useAuthStore } from '../features/auth/auth.store';
 
 export const DashboardLayout = () => {
   const user = useAuthStore((state) => state.user);

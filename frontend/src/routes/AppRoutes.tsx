@@ -9,7 +9,9 @@ import { ProfessionalSchedulesPage } from '../features/schedules/views/Professio
 import { NewAppointmentPage } from '../features/appointments/views/NewAppointmentPage';
 import { AppointmentsHistoryPage } from '../features/appointments/views/AppointmentsHistoryPage';
 import { Management } from '../features/management/views/Management';
-import { useAuthStore } from '../auth/auth.store'; // Importamos para la redirección de la raíz
+import { SysAdminDashboard } from '../features/clinics/views/SysAdminDashboard';
+import { useAuthStore } from '../features/auth/auth.store';
+import { RoleSwitcherDevTool } from '../components/dev/RoleSwitcherDevTool';
 
 // Placeholders temporales
 const PatientPortalDashboard = () => <div className="p-6">Portal Paciente: Mis Turnos</div>;
@@ -20,7 +22,8 @@ export const AppRoutes = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   return (
-    <Routes>
+    <>
+      <Routes>
       <Route path="/login" element={<Login />} />
 
       {/* =========================================================
@@ -45,6 +48,14 @@ export const AppRoutes = () => {
       </Route>
 
       {/* =========================================================
+          MÓDULO SÚPER ADMINISTRADOR
+          Panel independiente para el dueño del SaaS
+         ========================================================= */}
+      <Route element={<ProtectedRoute allowedRoles={['SUPERADMIN']} />}>
+        <Route path="/sysadmin" element={<SysAdminDashboard />} />
+      </Route>
+
+      {/* =========================================================
           MÓDULO PORTAL DEL PACIENTE
           Totalmente aislado del backoffice
          ========================================================= */}
@@ -63,6 +74,8 @@ export const AppRoutes = () => {
         element={
           !isAuthenticated ? (
             <Navigate to="/login" replace />
+          ) : user?.role === 'SUPERADMIN' ? (
+            <Navigate to="/sysadmin" replace />
           ) : user?.role === 'PATIENT' ? (
             <Navigate to="/portal/dashboard" replace />
           ) : (
@@ -73,5 +86,8 @@ export const AppRoutes = () => {
 
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
+
+      <RoleSwitcherDevTool />
+    </>
   );
 };

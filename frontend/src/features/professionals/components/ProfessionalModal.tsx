@@ -4,6 +4,7 @@ import { X, Save } from 'lucide-react';
 import type { Professional } from '../../../types/index';
 import { useSpecialties } from '../../management/hooks/useEspecialties';
 import { useCoverages } from '../../management/hooks/useCoverages'; 
+import { useAuthStore } from '../../auth/auth.store';
 
 interface ProfessionalModalProps {
   isOpen: boolean;
@@ -13,8 +14,9 @@ interface ProfessionalModalProps {
 }
 
 export const ProfessionalModal = ({ isOpen, onClose, onSubmit, professionalToEdit }: ProfessionalModalProps) => {
-  const { data: specialties = [], isLoading: isLoadingSpecs } = useSpecialties();
-  const { data: coverages = [], isLoading: isLoadingCovs } = useCoverages();
+  const clinicId = useAuthStore((state) => state.user?.clinicId);
+  const { data: specialties = [], isLoading: isLoadingSpecs } = useSpecialties(clinicId);
+  const { data: coverages = [], isLoading: isLoadingCovs } = useCoverages(clinicId);
   
   const [selectedSpecialties, setSelectedSpecialties] = useState<number[]>([]);
   const [selectedCoverages, setSelectedCoverages] = useState<number[]>([]); 

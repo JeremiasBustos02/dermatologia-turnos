@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Search, UserPlus, User } from 'lucide-react';
+import { User, UserPlus } from 'lucide-react';
 import { usePatients } from '../../../patients/hooks/usePatients';
+import { SearchablePicker } from '../../../../components/shared/SearchablePicker';
 import type { Patient } from '../../../../types/index';
+import { useAuthStore } from '../../../auth/auth.store';
 
 interface PatientStepProps {
   onNext: (patientId: number) => void;
@@ -9,7 +11,8 @@ interface PatientStepProps {
 }
 
 export const PatientStep = ({ onNext, defaultSelected }: PatientStepProps) => {
-  const { data: patients = [], isLoading, isError } = usePatients();
+  const clinicId = useAuthStore((state) => state.user?.clinicId);
+  const { data: patients = [], isLoading, isError } = usePatients(clinicId);
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredPatients = (patients as Patient[]).filter(p => 
@@ -18,65 +21,43 @@ export const PatientStep = ({ onNext, defaultSelected }: PatientStepProps) => {
     p.lastName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSelectPatient = (id: number) => {
-    onNext(id); // 🌟 Actualiza el estado de NewAppointmentPage al instante
-  };
-
-  if (isLoading) return <div className="p-8 text-center text-xs text-slate-400">Cargando pacientes...</div>;
-  if (isError) return <div className="p-8 text-center text-xs text-rose-500">Error al cargar el padrón.</div>;
-
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-base font-bold text-slate-800">1. Selecciona un paciente</h2>
-          <p className="text-xs text-slate-400 font-medium">Buscá al paciente en la base de datos de la clínica.</p>
-        </div>
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-          <input 
-            type="text" 
-            placeholder="Buscar por DNI o apellido..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-1.5 border border-slate-300 rounded-lg text-xs outline-hidden focus:ring-2 focus:ring-blue-500/20 bg-slate-50/50 focus:bg-white transition-all"
-          />
-        </div>
+    <div className="space-y-6">
+      <div className="border-b border-slate-100 pb-3">
+        <h2 className="text-lg font-bold text-slate-800">1. Selecciona un paciente</h2>
+        <p className="text-sm text-slate-400 font-medium">Buscá al paciente en la base de datos de la clínica para iniciar la reserva.</p>
       </div>
 
-      <div className="border border-slate-200 rounded-xl max-h-[280px] overflow-y-auto bg-white shadow-3xs">
-        {filteredPatients.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 flex flex-col items-center justify-center">
-            <UserPlus size={28} className="mb-2 text-slate-300" />
-            <p className="text-xs font-medium">No se encontraron pacientes.</p>
-          </div>
-        ) : (
-          <div className="divide-y divide-slate-100">
-            {filteredPatients.map(patient => {
-              const isSelected = defaultSelected === patient.id;
-              return (
-                <div 
-                  key={patient.id}
-                  onClick={() => handleSelectPatient(patient.id)}
-                  className={`flex items-center justify-between p-3 cursor-pointer transition-all ${isSelected ? 'bg-blue-50/60' : 'hover:bg-slate-50/60'}`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isSelected ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
-                      <User size={14} />
-                    </div>
-                    <div>
-                      <p className={`text-xs font-semibold ${isSelected ? 'text-blue-900' : 'text-slate-800'}`}>{patient.firstName} {patient.lastName}</p>
-                      <p className="text-[11px] text-slate-400 mt-0.5">DNI: {patient.dni} • {patient.email || 'Sin correo registrado'}</p>
-                    </div>
-                  </div>
-                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${isSelected ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300'}`}>
-                    {isSelected && <span className="text-[9px] font-bold">✓</span>}
-                  </div>
+      <div className="w-auto mt-4">
+        <SearchablePicker
+          items={filteredPatients}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          selectedId={defaultSelected}
+          onSelect={(patient) => onNext(patient.id)}
+          searchPlaceholder="Buscar paciente por DNI o apellido..."
+          isLoading={isLoading}
+          isError={isError}
+          loadingMessage="Cargando padrón de pacientes..."
+          errorMessage="Error al cargar el padrón."
+          emptyMessage="No se encontraron pacientes con ese criterio."
+          emptyIcon={<UserPlus size={28} />}
+          maxHeight="300px"
+          renderItem={(patient, isSelected) => (
+            <>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors flex-shrink-0 ${isSelected ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
+                <User size={18} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className={`text-sm font-semibold truncate ${isSelected ? 'text-blue-900' : 'text-slate-800'}`}>{patient.firstName} {patient.lastName}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-[11px] font-medium px-2 py-0.5 bg-slate-100 text-slate-500 rounded-md">DNI: {patient.dni}</span>
+                  <span className="text-[11px] text-slate-400 truncate">{patient.email || 'Sin correo registrado'}</span>
                 </div>
-              );
-            })}
-          </div>
-        )}
+              </div>
+            </>
+          )}
+        />
       </div>
     </div>
   );

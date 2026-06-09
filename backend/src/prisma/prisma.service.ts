@@ -4,15 +4,16 @@ import { PrismaClient } from '@prisma/client';
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor() {
-    super();
+    super({
+      log: ['query'],
+    });
 
-    // 1. Guardamos la referencia exacta al cliente base de Prisma
     const client = this;
 
     return client.$extends({
       query: {
         $allModels: {
-          
+
           async delete({ model, args, query }) {
             const softDeleteModels = ['User', 'Professional', 'Specialty', 'Coverage'];
             if (softDeleteModels.includes(model)) {
@@ -57,12 +58,19 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
           async findUnique({ model, args, query }) {
             const softDeleteModels = ['User', 'Professional', 'Specialty', 'Coverage'];
             if (softDeleteModels.includes(model)) {
-              // Transformamos el findUnique en un findFirst apuntando directamente al cliente base
               const modelName = model.charAt(0).toLowerCase() + model.slice(1);
               return (client as any)[modelName].findFirst({
                 ...args,
                 where: { ...(args as any).where, deletedAt: null },
               });
+            }
+            return query(args);
+          },
+
+          async count({ model, args, query }) {
+            const softDeleteModels = ['User', 'Professional', 'Specialty', 'Coverage'];
+            if (softDeleteModels.includes(model)) {
+              (args as any).where = { ...(args as any).where, deletedAt: null };
             }
             return query(args);
           },

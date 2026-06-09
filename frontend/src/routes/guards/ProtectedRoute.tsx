@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuthStore } from '../../auth/auth.store';
+import { useAuthStore } from '../../features/auth/auth.store';
 import type { UserRole } from '../../types/index';
 
 interface ProtectedRouteProps {
@@ -7,10 +7,14 @@ interface ProtectedRouteProps {
   allowOnlyPatients?: boolean;
 }
 
-export const ProtectedRoute = ({ allowedRoles, allowOnlyPatients = false }: ProtectedRouteProps) => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const user = useAuthStore((state) => state.user); // Recuperamos el usuario con su rol del store global
+export const ProtectedRoute = ({
+  allowedRoles,
+  allowOnlyPatients = false,
+}: ProtectedRouteProps) => {
   const location = useLocation();
+
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
@@ -19,13 +23,18 @@ export const ProtectedRoute = ({ allowedRoles, allowOnlyPatients = false }: Prot
   const userRole = user?.role;
 
   if (allowOnlyPatients && userRole !== 'PATIENT') {
-    return <Navigate to="/dashboard" replace />; 
+    return <Navigate to="/dashboard" replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(userRole as UserRole)) {
+    if (userRole === 'SUPERADMIN') {
+      return <Navigate to="/sysadmin" replace />;
+    }
+
     if (userRole === 'PATIENT') {
       return <Navigate to="/portal/dashboard" replace />;
     }
+    
     return <Navigate to="/dashboard" replace />;
   }
 

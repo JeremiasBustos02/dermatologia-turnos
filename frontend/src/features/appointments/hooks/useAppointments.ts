@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createAppointment, getAppointments, getProfessionalSchedules, updateAppointmentStatus } from "../services/appointments.api";
+import { createAppointment, getAppointments, updateAppointmentStatus } from "../services/appointments.api";
 import type { AppointmentFilters } from "../services/appointments.api";
 import { getAvailableSlots } from '../services/appointments.api';
 
@@ -10,10 +10,10 @@ export const useAppointments = (filters?: AppointmentFilters) => {
   });
 };
 
-export const useAvailableSlots = (professionalId: number, date: string) => {
+export const useAvailableSlots = (professionalId: number, date: string, clinicId?: number) => {
   return useQuery({
-    queryKey: ['availableSlots', professionalId, date],
-    queryFn: () => getAvailableSlots(professionalId, date),
+    queryKey: ['availableSlots', professionalId, date, clinicId],
+    queryFn: () => getAvailableSlots(professionalId, date, clinicId),
     enabled: !!professionalId && !!date, 
   });
 };
@@ -25,14 +25,6 @@ export const useCreateAppointment = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] }); 
     },
-  });
-};
-
-export const useProfessionalSchedules = (professionalId: number) => {
-  return useQuery({
-    queryKey: ['schedules', professionalId],
-    queryFn: () => getProfessionalSchedules(professionalId),
-    enabled: !!professionalId,
   });
 };
 
@@ -50,3 +42,5 @@ export const useUpdateAppointmentStatus = () => {
     }
   });
 };
+
+export { useProfessionalSchedules } from '../../schedules/hooks/useSchedules';

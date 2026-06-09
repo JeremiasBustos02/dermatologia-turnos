@@ -1,5 +1,5 @@
 import { apiClient } from '../api/apiClient';
-import { type User } from '../auth/auth.types';
+import { type User } from '../features/auth/auth.types';
 
 export async function getMe(): Promise<User> {
   const { data } = await apiClient.get('/auth/me');

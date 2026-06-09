@@ -1,11 +1,6 @@
-import type { Patient, Professional } from '../../../types/index';
+import type { Patient, Professional, Coverage } from '../../../types/index';
 
 export type AppointmentStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
-
-export interface Coverage {
-  id: number;
-  name: string;
-}
 
 export interface Appointment {
   id: number;

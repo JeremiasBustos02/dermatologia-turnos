@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useAuthStore } from '../auth/auth.store';
+import { useAuthStore } from '../features/auth/auth.store';
 
 let isRefreshing = false;
 let queue: any[] = [];
@@ -22,6 +22,10 @@ apiClient.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config;
+
+    if (original.url?.includes('/auth/login')) {
+      return Promise.reject(error);
+    }
 
     if (error.response?.status !== 401) {
       return Promise.reject(error);

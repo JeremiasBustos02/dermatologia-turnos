@@ -1,19 +1,19 @@
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
-import { CheckCircle, Calendar, User, Stethoscope, FileText } from 'lucide-react';
+import { CheckCircle, Calendar, User, Stethoscope } from 'lucide-react';
 import { usePatients } from '../../../patients/hooks/usePatients';
 import { useProfessionals } from '../../../professionals/hooks/useProfessionals';
-import type { NewAppointmentState } from '../../views/NewAppointmentPage';
+import type { NewAppointmentState } from '../../hooks/useWizard';
+import { useAuthStore } from '../../../auth/auth.store';
 
 interface SummaryStepProps {
   appointmentData: NewAppointmentState;
-  onConfirm: () => void;
-  isSubmitting: boolean;
 }
 
-export const SummaryStep = ({ appointmentData, onConfirm, isSubmitting }: SummaryStepProps) => {
-  const { data: patients = [] } = usePatients();
-  const { data: professionals = [] } = useProfessionals();
+export const SummaryStep = ({ appointmentData }: SummaryStepProps) => {
+  const clinicId = useAuthStore((state) => state.user?.clinicId);
+  const { data: patients = [] } = usePatients(clinicId);
+  const { data: professionals = [] } = useProfessionals(clinicId);
 
   const patient = patients.find(p => p.id === appointmentData.patientId);
   const professional = professionals.find(p => p.id === appointmentData.professionalId);
