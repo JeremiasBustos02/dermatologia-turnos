@@ -27,9 +27,14 @@ export const ProtectedRoute = ({
   }
 
   if (allowedRoles && !allowedRoles.includes(userRole as UserRole)) {
+    if (userRole === 'SUPERADMIN') {
+      return <Navigate to="/sysadmin" replace />;
+    }
+
     if (userRole === 'PATIENT') {
       return <Navigate to="/portal/dashboard" replace />;
     }
+    
     return <Navigate to="/dashboard" replace />;
   }
 

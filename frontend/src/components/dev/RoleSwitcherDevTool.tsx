@@ -2,6 +2,7 @@ import { useAuthStore } from '../../features/auth/auth.store';
 import type { UserRole } from '../../types';
 
 const ROLES: { label: string; value: UserRole }[] = [
+  { label: 'SuperAdmin', value: 'SUPERADMIN' },
   { label: 'Admin', value: 'ADMIN' },
   { label: 'Recepcionista', value: 'RECEPTIONIST' },
   { label: 'Profesional', value: 'PROFESSIONAL' },

@@ -150,6 +150,7 @@ model Clinic {
 enum UserRole {
   PATIENT
   RECEPTIONIST
+  SUPERADMIN
   ADMIN
   PROFESSIONAL
 }

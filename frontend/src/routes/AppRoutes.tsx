@@ -9,6 +9,7 @@ import { ProfessionalSchedulesPage } from '../features/schedules/views/Professio
 import { NewAppointmentPage } from '../features/appointments/views/NewAppointmentPage';
 import { AppointmentsHistoryPage } from '../features/appointments/views/AppointmentsHistoryPage';
 import { Management } from '../features/management/views/Management';
+import { SysAdminDashboard } from '../features/clinics/views/SysAdminDashboard';
 import { useAuthStore } from '../features/auth/auth.store';
 import { RoleSwitcherDevTool } from '../components/dev/RoleSwitcherDevTool';
 
@@ -47,6 +48,14 @@ export const AppRoutes = () => {
       </Route>
 
       {/* =========================================================
+          MÓDULO SÚPER ADMINISTRADOR
+          Panel independiente para el dueño del SaaS
+         ========================================================= */}
+      <Route element={<ProtectedRoute allowedRoles={['SUPERADMIN']} />}>
+        <Route path="/sysadmin" element={<SysAdminDashboard />} />
+      </Route>
+
+      {/* =========================================================
           MÓDULO PORTAL DEL PACIENTE
           Totalmente aislado del backoffice
          ========================================================= */}
@@ -65,6 +74,8 @@ export const AppRoutes = () => {
         element={
           !isAuthenticated ? (
             <Navigate to="/login" replace />
+          ) : user?.role === 'SUPERADMIN' ? (
+            <Navigate to="/sysadmin" replace />
           ) : user?.role === 'PATIENT' ? (
             <Navigate to="/portal/dashboard" replace />
           ) : (
