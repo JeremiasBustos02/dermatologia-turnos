@@ -2,10 +2,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getPatients, createPatient, updatePatient, deletePatient } from '../services/patients.api';
 import type { CreatePatientDTO } from '../../../types/index';
 
-export const usePatients = (clinicId?: number) => {
+export const usePatients = () => {
   return useQuery({
-    queryKey: ['patients', { clinicId }],
-    queryFn: () => getPatients({ clinicId }),
+    queryKey: ['patients'],
+    queryFn: () => getPatients(),
   });
 };
 
@@ -28,7 +28,7 @@ export const useUpdatePatient = () => {
 export const useDeletePatient = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, clinicId }: { id: number; clinicId?: number }) => deletePatient(id, clinicId),
+    mutationFn: ({ id }: { id: number }) => deletePatient(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['patients'] }),
   });
 };

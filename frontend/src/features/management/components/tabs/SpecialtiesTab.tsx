@@ -4,17 +4,16 @@ import { useSpecialties, useCreateSpecialty } from '../../hooks/useEspecialties'
 import { SpecialtyModal } from '../SpecialtyModal';
 
 interface SpecialtiesTabProps {
-  clinicId?: number;
   onDeleteRequest: (id: number, type: 'spec') => void;
 }
 
-export const SpecialtiesTab = ({ clinicId, onDeleteRequest }: SpecialtiesTabProps) => {
+export const SpecialtiesTab = ({ onDeleteRequest }: SpecialtiesTabProps) => {
   const [isSpecModalOpen, setIsSpecModalOpen] = useState(false);
-  const { data: specialties = [], isLoading: isLoadingSpecs } = useSpecialties(clinicId);
+  const { data: specialties = [], isLoading: isLoadingSpecs } = useSpecialties();
   const createSpecialtyMutation = useCreateSpecialty();
 
   const handleSpecSubmit = (data: { name: string; description: string }) => {
-    createSpecialtyMutation.mutate({ ...data, clinicId: clinicId! }, { onSuccess: () => setIsSpecModalOpen(false) });
+    createSpecialtyMutation.mutate(data, { onSuccess: () => setIsSpecModalOpen(false) });
   };
 
   const specialtiesList = Array.isArray(specialties) ? specialties : [];

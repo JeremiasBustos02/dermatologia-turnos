@@ -7,10 +7,8 @@ import type { Appointment } from '../types';
 import { DashboardStats } from '../components/DashboardStats';
 import dayjs from 'dayjs';
 import { DatePicker } from '../../../components/ui/data-picker';
-import { useAuthStore } from '../../auth/auth.store';
 
 export const Dashboard = () => {
-  const clinicId = useAuthStore((state) => state.user?.clinicId);
   const [date, setDate] = useState<Date | undefined>(new Date());
   const location = useLocation();
   const navigate = useNavigate();
@@ -34,7 +32,7 @@ export const Dashboard = () => {
   }, [location, navigate]);
 
   const formattedDate = date ? dayjs(date).format('YYYY-MM-DD') : undefined;
-  const { data: appointments = [], isLoading, isError } = useAppointments({ dateFrom: formattedDate, dateTo: formattedDate, clinicId });
+  const { data: appointments = [], isLoading, isError } = useAppointments({ dateFrom: formattedDate, dateTo: formattedDate });
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 relative">

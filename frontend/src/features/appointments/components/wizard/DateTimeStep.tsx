@@ -3,7 +3,6 @@ import dayjs from 'dayjs';
 import { Clock, AlertCircle, Sunrise, Sun, Sunset } from 'lucide-react';
 import { useAvailableSlots, useProfessionalSchedules } from '../../hooks/useAppointments';
 import { CustomCalendar } from './CustomCalendar';
-import { useAuthStore } from '../../../auth/auth.store';
 
 interface DateTimeStepProps {
     professionalId: number;
@@ -13,12 +12,11 @@ interface DateTimeStepProps {
 }
 
 export const DateTimeStep = ({ professionalId, onNext, defaultDate, defaultTime }: DateTimeStepProps) => {
-    const clinicId = useAuthStore((state) => state.user?.clinicId);
     const [selectedDate, setSelectedDate] = useState<string>(defaultDate || dayjs().format('YYYY-MM-DD'));
     const [selectedTime, setSelectedTime] = useState<string | undefined>(defaultTime);
 
-    const { data: slots = [], isLoading, isError, isFetching } = useAvailableSlots(professionalId, selectedDate, clinicId);
-    const { data: schedules = [] } = useProfessionalSchedules(professionalId, clinicId);
+    const { data: slots = [], isLoading, isError, isFetching } = useAvailableSlots(professionalId, selectedDate);
+    const { data: schedules = [] } = useProfessionalSchedules(professionalId);
 
     const dayMap: Record<string, number> = {
         SUNDAY: 0, MONDAY: 1, TUESDAY: 2, WEDNESDAY: 3, THURSDAY: 4, FRIDAY: 5, SATURDAY: 6,

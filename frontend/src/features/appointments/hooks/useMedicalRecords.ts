@@ -8,7 +8,6 @@ export interface CreateMedicalRecordDTO {
   reason?: string;
   evolution: string;
   prescription?: string;
-  clinicId: number;
 }
 
 export const useCreateMedicalRecord = () => {
@@ -26,12 +25,12 @@ export const useCreateMedicalRecord = () => {
   });
 };
 
-export const useMedicalRecordsByPatient = (patientId?: number, clinicId?: number) => {
+export const useMedicalRecordsByPatient = (patientId?: number) => {
   return useQuery({
-    queryKey: ['medical-records', 'patient', patientId, clinicId],
+    queryKey: ['medical-records', 'patient', patientId],
     queryFn: async () => {
       const { data } = await apiClient.get('/medical-records', {
-        params: { patientId, clinicId, limit: 20 },
+        params: { patientId, limit: 20 },
       });
       return data.data;
     },

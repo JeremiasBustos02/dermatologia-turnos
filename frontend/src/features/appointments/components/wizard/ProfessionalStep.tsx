@@ -4,7 +4,6 @@ import { useProfessionals } from '../../../professionals/hooks/useProfessionals'
 import { useCoverages } from '../../../management/hooks/useCoverages';
 import { SearchablePicker } from '../../../../components/shared/SearchablePicker';
 import type { Professional } from '../../../../types/index';
-import { useAuthStore } from '../../../auth/auth.store';
 
 interface ProfessionalStepProps {
   onNext: (data: { professionalId: number; coverageId: number }) => void;
@@ -13,9 +12,8 @@ interface ProfessionalStepProps {
 }
 
 export const ProfessionalStep = ({ onNext, defaultProfessionalId, defaultCoverageId }: ProfessionalStepProps) => {
-  const clinicId = useAuthStore((state) => state.user?.clinicId);
-  const { data: professionals = [], isLoading, isError } = useProfessionals(clinicId);
-  const { data: coverages = [] } = useCoverages(clinicId);
+  const { data: professionals = [], isLoading, isError } = useProfessionals();
+  const { data: coverages = [] } = useCoverages();
   const [searchTerm, setSearchTerm] = useState('');
   
   const [selectedProfessional, setSelectedProfessional] = useState<number | undefined>(defaultProfessionalId);

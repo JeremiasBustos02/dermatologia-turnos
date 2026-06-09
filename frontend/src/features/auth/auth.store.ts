@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { type User, type UserRole, type AuthState } from './auth.types';
+import { type User, type AuthState } from './auth.types';
+import type { UserRole } from '../../types';
 
 interface AuthActions {
   setSession: (token: string, user: User) => void;

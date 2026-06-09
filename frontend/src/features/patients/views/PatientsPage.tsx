@@ -4,11 +4,9 @@ import { PatientsTable } from '../components/PatientsTable';
 import { PatientModal } from '../components/PatientModal';
 import { usePatients, useCreatePatient, useUpdatePatient, useDeletePatient } from '../hooks/usePatients';
 import type { Patient, CreatePatientDTO } from '../../../types/index';
-import { useAuthStore } from '../../auth/auth.store';
 
 export const PatientsPage = () => {
-  const clinicId = useAuthStore((state) => state.user?.clinicId);
-  const { data: patients = [], isLoading, isError } = usePatients(clinicId);
+  const { data: patients = [], isLoading, isError } = usePatients();
   const createMutation = useCreatePatient();
   const updateMutation = useUpdatePatient();
   const deleteMutation = useDeletePatient();
@@ -18,7 +16,7 @@ export const PatientsPage = () => {
 
   const handleDelete = (id: number) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este paciente?')) {
-      deleteMutation.mutate({ id, clinicId });
+      deleteMutation.mutate({ id });
     }
   };
 
@@ -40,7 +38,6 @@ export const PatientsPage = () => {
         lastName: data.lastName,
         email: data.email,
         coverageId: !data.coverageId ? null : Number(data.coverageId),
-        clinicId,
       };
 
       updateMutation.mutate(
@@ -57,7 +54,6 @@ export const PatientsPage = () => {
         ...data,
         coverageId: !data.coverageId ? null : Number(data.coverageId),
         role: 'PATIENT' as const,
-        clinicId,
       };
 
       createMutation.mutate(completeData, {

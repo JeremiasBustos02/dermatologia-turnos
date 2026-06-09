@@ -2,15 +2,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../../api/apiClient';
 import { getProfessionalSchedules } from '../services/schedules.api';
 
-export const useProfessionalSchedules = (professionalId: number, clinicId?: number) => {
+export const useProfessionalSchedules = (professionalId: number) => {
     return useQuery({
-        queryKey: ['schedules', professionalId, clinicId],
-        queryFn: () => getProfessionalSchedules(professionalId, clinicId),
+        queryKey: ['schedules', professionalId],
+        queryFn: () => getProfessionalSchedules(professionalId),
         enabled: !!professionalId,
     });
 };
 
-export const useSaveProfessionalSchedules = (professionalId: number, clinicId?: number) => {
+export const useSaveProfessionalSchedules = (professionalId: number) => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (schedules: {
@@ -22,7 +22,6 @@ export const useSaveProfessionalSchedules = (professionalId: number, clinicId?: 
         }[]) => {
             const { data } = await apiClient.post(`/schedules/professional/${professionalId}`, {
                 schedules,
-                clinicId,
             });
             return data;
         },

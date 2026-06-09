@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 import { X } from 'lucide-react';
 import type { CreatePatientDTO, Patient } from '../../../types/index';
 import { useCoverages } from '../../management/hooks/useCoverages';
-import { useAuthStore } from '../../auth/auth.store';
 
 interface PatientModalProps {
   isOpen: boolean;
@@ -17,8 +16,7 @@ interface PatientFormValues extends Omit<CreatePatientDTO, 'coverageId'> {
 }
 
 export const PatientModal = ({ isOpen, onClose, onSubmit, patientToEdit }: PatientModalProps) => {
-  const clinicId = useAuthStore((state) => state.user?.clinicId);
-  const { data: coverages = [], isLoading: isLoadingCovs } = useCoverages(clinicId);
+  const { data: coverages = [], isLoading: isLoadingCovs } = useCoverages();
 
   // Le pasamos el tipo al hook para que reconozca los mensajes de error como strings válidos
   const { register, handleSubmit, reset, formState: { errors } } = useForm<PatientFormValues>({

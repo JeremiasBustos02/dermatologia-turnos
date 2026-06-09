@@ -9,10 +9,8 @@ import { WizardNavigation } from '../components/wizard/WizardNavigation';
 import { WizardSidebar } from '../components/wizard/WizardSidebar';
 import { useWizard, STEPS } from '../hooks/useWizard';
 import { useCreateAppointment } from '../hooks/useAppointments';
-import { useAuthStore } from '../../auth/auth.store';
 
 export const NewAppointmentPage = () => {
-  const clinicId = useAuthStore((state) => state.user?.clinicId);
   const navigate = useNavigate();
   const wizard = useWizard();
   const createMutation = useCreateAppointment();
@@ -30,7 +28,6 @@ export const NewAppointmentPage = () => {
       coverageId: wizard.appointmentData.coverageId,
       dateTime: wizard.appointmentData.dateTime,
       notes: wizard.appointmentData.notes || 'Turno generado desde el panel operativo.',
-      clinicId,
     }, {
       onSuccess: () => {
         navigate('/dashboard', {

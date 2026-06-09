@@ -15,5 +15,4 @@ export interface CreateScheduleDTO {
   startTime: string;
   endTime: string;
   appointmentDuration: number;
-  clinicId: number;
 }

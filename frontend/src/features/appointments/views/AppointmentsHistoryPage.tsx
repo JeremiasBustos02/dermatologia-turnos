@@ -5,11 +5,9 @@ import { useAppointments, useUpdateAppointmentStatus } from '../hooks/useAppoint
 import type { Appointment } from '../types';
 import { StatusBadge } from '../../../components/shared/StatusBadge';
 import { ConfirmDialog } from '../../../components/shared/ConfirmDialog';
-import { useAuthStore } from '../../auth/auth.store';
 
 export const AppointmentsHistoryPage = () => {
-  const clinicId = useAuthStore((state) => state.user?.clinicId);
-  const { data: appointments = [], isLoading, isError } = useAppointments({ clinicId });
+  const { data: appointments = [], isLoading, isError } = useAppointments();
   const updateStatusMutation = useUpdateAppointmentStatus();
   const [searchTerm, setSearchTerm] = useState('');
   

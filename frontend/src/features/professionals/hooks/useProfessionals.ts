@@ -4,10 +4,10 @@ import type { CreateProfessionalDTO } from '../../../types/index';
 
 const PROFESSIONALS_KEY = ['professionals'];
 
-export const useProfessionals = (clinicId?: number) => {
+export const useProfessionals = () => {
   return useQuery({
-    queryKey: [...PROFESSIONALS_KEY, { clinicId }],
-    queryFn: () => getProfessionals({ clinicId }),
+    queryKey: PROFESSIONALS_KEY,
+    queryFn: () => getProfessionals(),
   });
 };
 
@@ -24,7 +24,7 @@ export const useCreateProfessional = () => {
 export const useDeleteProfessional = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, clinicId }: { id: number; clinicId?: number }) => deleteProfessional(id, clinicId),
+    mutationFn: ({ id }: { id: number }) => deleteProfessional(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: PROFESSIONALS_KEY });
     },

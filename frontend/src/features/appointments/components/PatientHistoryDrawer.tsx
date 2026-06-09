@@ -2,7 +2,6 @@ import { X, Activity, Calendar as CalendarIcon, Stethoscope, Pill, FileText, Use
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 import { useMedicalRecordsByPatient } from '../hooks/useMedicalRecords';
-import { useAuthStore } from '../../auth/auth.store';
 
 interface PatientHistoryDrawerProps {
   isOpen: boolean;
@@ -11,8 +10,7 @@ interface PatientHistoryDrawerProps {
 }
 
 export const PatientHistoryDrawer = ({ isOpen, onClose, patient }: PatientHistoryDrawerProps) => {
-  const clinicId = useAuthStore((state) => state.user?.clinicId);
-  const { data: records = [], isLoading, isError } = useMedicalRecordsByPatient(patient?.id, clinicId);
+  const { data: records = [], isLoading, isError } = useMedicalRecordsByPatient(patient?.id);
 
   if (!isOpen || !patient) return null;
 

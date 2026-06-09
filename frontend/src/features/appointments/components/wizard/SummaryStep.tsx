@@ -4,16 +4,14 @@ import { CheckCircle, Calendar, User, Stethoscope } from 'lucide-react';
 import { usePatients } from '../../../patients/hooks/usePatients';
 import { useProfessionals } from '../../../professionals/hooks/useProfessionals';
 import type { NewAppointmentState } from '../../hooks/useWizard';
-import { useAuthStore } from '../../../auth/auth.store';
 
 interface SummaryStepProps {
   appointmentData: NewAppointmentState;
 }
 
 export const SummaryStep = ({ appointmentData }: SummaryStepProps) => {
-  const clinicId = useAuthStore((state) => state.user?.clinicId);
-  const { data: patients = [] } = usePatients(clinicId);
-  const { data: professionals = [] } = useProfessionals(clinicId);
+  const { data: patients = [] } = usePatients();
+  const { data: professionals = [] } = useProfessionals();
 
   const patient = patients.find(p => p.id === appointmentData.patientId);
   const professional = professionals.find(p => p.id === appointmentData.professionalId);

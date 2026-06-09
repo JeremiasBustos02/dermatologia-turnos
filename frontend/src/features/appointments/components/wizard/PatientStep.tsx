@@ -3,7 +3,6 @@ import { User, UserPlus } from 'lucide-react';
 import { usePatients } from '../../../patients/hooks/usePatients';
 import { SearchablePicker } from '../../../../components/shared/SearchablePicker';
 import type { Patient } from '../../../../types/index';
-import { useAuthStore } from '../../../auth/auth.store';
 
 interface PatientStepProps {
   onNext: (patientId: number) => void;
@@ -11,8 +10,7 @@ interface PatientStepProps {
 }
 
 export const PatientStep = ({ onNext, defaultSelected }: PatientStepProps) => {
-  const clinicId = useAuthStore((state) => state.user?.clinicId);
-  const { data: patients = [], isLoading, isError } = usePatients(clinicId);
+  const { data: patients = [], isLoading, isError } = usePatients();
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredPatients = (patients as Patient[]).filter(p => 

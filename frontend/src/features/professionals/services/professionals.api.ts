@@ -1,12 +1,8 @@
 import { apiClient } from '../../../api/apiClient';
 import type { Professional, CreateProfessionalDTO } from '../../../types/index';
 
-export type ProfessionalFilters = {
-  clinicId?: number;
-};
-
-export const getProfessionals = async (filters?: ProfessionalFilters): Promise<Professional[]> => {
-  const { data } = await apiClient.get('/professionals', { params: filters ?? {} });
+export const getProfessionals = async (): Promise<Professional[]> => {
+  const { data } = await apiClient.get('/professionals');
   return data.data ?? data;
 };
 
@@ -15,8 +11,8 @@ export const createProfessional = async (professional: CreateProfessionalDTO): P
   return data.data ?? data;
 };
 
-export const deleteProfessional = async (id: number, clinicId?: number): Promise<void> => {
-  await apiClient.delete(`/professionals/${id}`, { params: { clinicId } });
+export const deleteProfessional = async (id: number): Promise<void> => {
+  await apiClient.delete(`/professionals/${id}`);
 };
 
 export const updateProfessional = async ({ id, data }: { id: number; data: Partial<CreateProfessionalDTO> }): Promise<Professional> => {
