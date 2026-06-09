@@ -11,8 +11,8 @@ export class AuthService {
         private jwtService: JwtService,
     ) { }
 
-    async getTokens(userId: number, email: string, role: string) {
-        const payload = { sub: userId, email, role };
+    async getTokens(userId: number, email: string, role: string, clinicId: number | null) {
+        const payload = { sub: userId, email, role, clinicId };
 
         const [accessToken, refreshToken] = await Promise.all([
             this.jwtService.signAsync(payload, {
@@ -51,7 +51,7 @@ export class AuthService {
             throw new UnauthorizedException('Credenciales inválidas');
         }
 
-        const tokens = await this.getTokens(user.id, user.email || '', user.role);
+        const tokens = await this.getTokens(user.id, user.email || '', user.role, user.clinicId);
         await this.updateRefreshToken(user.id, tokens.refreshToken);
 
         return {
@@ -62,6 +62,7 @@ export class AuthService {
                 dni: user.dni,
                 email: user.email,
                 role: user.role,
+                clinicId: user.clinicId,
             },
             ...tokens,
         };
@@ -81,7 +82,7 @@ export class AuthService {
             throw new ForbiddenException('Acceso denegado');
         }
 
-        const tokens = await this.getTokens(user.id, user.email || '', user.role);
+        const tokens = await this.getTokens(user.id, user.email || '', user.role, user.clinicId);
         await this.updateRefreshToken(user.id, tokens.refreshToken);
 
         return tokens;
@@ -108,6 +109,7 @@ export class AuthService {
                 dni: true,
                 email: true,
                 role: true,
+                clinicId: true,
             },
         });
 
@@ -122,6 +124,7 @@ export class AuthService {
             dni: user.dni,
             email: user.email,
             role: user.role,
+            clinicId: user.clinicId,
         };
     }
 }

@@ -9,6 +9,8 @@ import { SchedulesModule } from './modules/schedules/schedules.module';
 import { UsersModule } from './modules/users/users.module';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { MedicalRecordsModule } from './modules/medical-records/medical-records.module';
+import { ClinicsModule } from './modules/clinics/clinics.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { AuthModule } from './modules/auth/auth.module';
       ttl: 60000,
       limit: 20,
     }]),
+    MedicalRecordsModule,
+    ClinicsModule,
   ],
   providers: [
     {

@@ -16,7 +16,7 @@ export const PatientsPage = () => {
 
   const handleDelete = (id: number) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este paciente?')) {
-      deleteMutation.mutate(id);
+      deleteMutation.mutate({ id });
     }
   };
 
@@ -37,7 +37,7 @@ export const PatientsPage = () => {
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
-        coverageId: !data.coverageId ? null : Number(data.coverageId)
+        coverageId: !data.coverageId ? null : Number(data.coverageId),
       };
 
       updateMutation.mutate(
@@ -53,7 +53,7 @@ export const PatientsPage = () => {
       const completeData = {
         ...data,
         coverageId: !data.coverageId ? null : Number(data.coverageId),
-        role: 'PATIENT' as const
+        role: 'PATIENT' as const,
       };
 
       createMutation.mutate(completeData, {

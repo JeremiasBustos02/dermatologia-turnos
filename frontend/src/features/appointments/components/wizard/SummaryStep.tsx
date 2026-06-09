@@ -1,17 +1,15 @@
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
-import { CheckCircle, Calendar, User, Stethoscope, FileText } from 'lucide-react';
+import { CheckCircle, Calendar, User, Stethoscope } from 'lucide-react';
 import { usePatients } from '../../../patients/hooks/usePatients';
 import { useProfessionals } from '../../../professionals/hooks/useProfessionals';
-import type { NewAppointmentState } from '../../views/NewAppointmentPage';
+import type { NewAppointmentState } from '../../hooks/useWizard';
 
 interface SummaryStepProps {
   appointmentData: NewAppointmentState;
-  onConfirm: () => void;
-  isSubmitting: boolean;
 }
 
-export const SummaryStep = ({ appointmentData, onConfirm, isSubmitting }: SummaryStepProps) => {
+export const SummaryStep = ({ appointmentData }: SummaryStepProps) => {
   const { data: patients = [] } = usePatients();
   const { data: professionals = [] } = useProfessionals();
 

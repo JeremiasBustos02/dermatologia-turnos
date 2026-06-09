@@ -1,29 +1,43 @@
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsPositive,
+  IsString,
+  ValidateIf,
+} from 'class-validator';
 import { UserRole } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreateUserDto {
   @ApiProperty()
   @IsString()
+  @IsNotEmpty()
   dni!: string;
 
   @ApiProperty()
   @IsString()
+  @IsNotEmpty()
   firstName!: string;
 
   @ApiProperty()
   @IsString()
+  @IsNotEmpty()
   lastName!: string;
 
   @ApiProperty()
   @IsOptional()
-  @IsString()
+  @IsEmail()
   email?: string;
 
-  @ApiProperty()
-  @IsOptional()
+  @ApiProperty({ required: false })
+  @ValidateIf((dto) => dto.role !== UserRole.PATIENT || dto.password !== undefined)
   @IsString()
-  password!: string;
+  @IsNotEmpty()
+  password?: string;
 
   @ApiProperty()
   @IsEnum(UserRole)
@@ -31,6 +45,8 @@ export class CreateUserDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsNumber() 
+  @Type(() => Number)
+  @IsInt()
+  @IsPositive()
   coverageId?: number | null;
 }

@@ -1,21 +1,24 @@
 import { Type } from 'class-transformer';
-import { IsOptional, IsString, IsNumber, IsDateString } from 'class-validator';
+import { IsOptional, IsString, IsInt, IsPositive, IsDateString } from 'class-validator';
 import { PaginationDto } from '../../../common/dto/pagination.dto';
 
 export class FiltersAppointmentsDto extends PaginationDto {
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
+  @IsInt()
+  @IsPositive()
   patientId?: number;
 
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
+  @IsInt()
+  @IsPositive()
   professionalId?: number;
 
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
+  @IsInt()
+  @IsPositive()
   coverageId?: number;
 
   @IsOptional()

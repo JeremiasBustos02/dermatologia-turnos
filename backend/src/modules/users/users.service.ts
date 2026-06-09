@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -18,7 +18,16 @@ export class UsersService {
       password = dto.dni;
     }
 
+    if (!password) {
+      throw new BadRequestException('Password requerida para este rol');
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    const coverageSelect = {
+      id: true,
+      name: true,
+    };
 
     return this.prisma.user.create({
       data: {
@@ -33,7 +42,7 @@ export class UsersService {
         lastName: true,
         email: true,
         role: true,
-        coverage: true, 
+        coverage: { select: coverageSelect },
       }
     });
   }
@@ -69,7 +78,7 @@ export class UsersService {
           role: true,
           createdAt: true,
           updatedAt: true,
-          coverage: true,
+          coverage: { select: { id: true, name: true } },
         },
       }),
     ]);
@@ -98,7 +107,7 @@ export class UsersService {
         role: true,
         createdAt: true,
         updatedAt: true,
-        coverage: true,
+        coverage: { select: { id: true, name: true } },
       },
     });
 
@@ -123,7 +132,7 @@ export class UsersService {
             : undefined,
       },
       include: {
-        coverage: true,
+        coverage: { select: { id: true, name: true } },
       },
     });
   }
@@ -146,7 +155,7 @@ export class UsersService {
         role: true,
         createdAt: true,
         updatedAt: true,
-        coverage: true,
+        coverage: { select: { id: true, name: true } },
       },
     });
 

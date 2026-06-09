@@ -1,39 +1,46 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { DayOfWeek, Schedule } from '@prisma/client';
+import { DayOfWeek, Prisma, Schedule } from '@prisma/client';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { FilterSchedulesDto } from './dto/FiltersSchedulesDto';
 import { UpdateProfessionalSchedulesDto } from './dto/update-professional-schedules.dto';
 
+type ScheduleClient = Prisma.TransactionClient | PrismaService;
+
 @Injectable()
 export class SchedulesService {
   constructor(private prisma: PrismaService) { }
 
   async create(dto: CreateScheduleDto) {
-    const professional = await this.prisma.professional.findUnique({
-      where: {
-        id: dto.professionalId,
-      },
-    });
+    return this.prisma.$transaction(async (tx) => {
+      const professional = await tx.professional.findUnique({
+        where: {
+          id: dto.professionalId,
+        },
+        select: { id: true },
+      });
 
-    if (!professional) {
-      throw new BadRequestException('El profesional no existe');
-    }
+      if (!professional) {
+        throw new BadRequestException('El profesional no existe');
+      }
 
-    if (dto.startTime >= dto.endTime) {
-      throw new BadRequestException('La hora de fin debe ser mayor que la hora de inicio');
-    }
+      if (dto.startTime >= dto.endTime) {
+        throw new BadRequestException('La hora de fin debe ser mayor que la hora de inicio');
+      }
 
-    await this.validateScheduleOverlap(
-      dto.professionalId,
-      dto.dayOfWeek,
-      dto.startTime,
-      dto.endTime,
-    );
+      await this.validateScheduleOverlap(
+        dto.professionalId,
+        dto.dayOfWeek,
+        dto.startTime,
+        dto.endTime,
+        undefined,
+        tx,
+      );
 
-    return this.prisma.schedule.create({
-      data: dto,
+      return tx.schedule.create({
+        data: dto,
+      });
     });
   }
 
@@ -103,6 +110,7 @@ export class SchedulesService {
       where: {
         id: professionalId,
       },
+      select: { id: true },
     });
 
     if (!professional) {
@@ -113,20 +121,29 @@ export class SchedulesService {
       throw new BadRequestException('La hora de fin debe ser mayor que la hora de inicio');
     }
 
-    await this.validateScheduleOverlap(
-      professionalId,
-      dayOfWeek,
-      startTime,
-      endTime,
-      id,
-    );
+    return this.prisma.$transaction(async (tx) => {
+      await this.validateScheduleOverlap(
+        professionalId,
+        dayOfWeek,
+        startTime,
+        endTime,
+        id,
+        tx,
+      );
 
-    return this.prisma.schedule.update({
-      where: { id },
-      data: updateScheduleDto,
-      include: {
-        professional: true,
-      },
+      return tx.schedule.update({
+        where: { id },
+        data: updateScheduleDto,
+        select: {
+          id: true,
+          professionalId: true,
+          startTime: true,
+          endTime: true,
+          appointmentDuration: true,
+          dayOfWeek: true,
+          professional: { select: { id: true, firstName: true, lastName: true } },
+        },
+      });
     });
   }
 
@@ -144,8 +161,9 @@ export class SchedulesService {
     startTime: string,
     endTime: string,
     ignoreScheduleId?: number,
+    prisma: ScheduleClient = this.prisma,
   ) {
-    const overlappingSchedule = await this.prisma.schedule.findFirst({
+    const overlappingSchedule = await prisma.schedule.findFirst({
       where: {
         professionalId,
         dayOfWeek,
@@ -170,7 +188,8 @@ export class SchedulesService {
     dto: UpdateProfessionalSchedulesDto,
   ) {
     const professional = await this.prisma.professional.findUnique({
-      where: { id: professionalId, deletedAt: null },
+      where: { id: professionalId },
+      select: { id: true },
     });
 
     if (!professional) {

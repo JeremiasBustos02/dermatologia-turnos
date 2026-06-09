@@ -2,7 +2,7 @@ import { apiClient } from '../../../api/apiClient';
 import type { Schedule, CreateScheduleDTO } from '../types';
 
 export const getProfessionalSchedules = async (professionalId: number): Promise<Schedule[]> => {
-  const { data } = await apiClient.get(`/schedules?professionalId=${professionalId}`);
+  const { data } = await apiClient.get('/schedules', { params: { professionalId } });
   return data.data ?? data;
 };
 

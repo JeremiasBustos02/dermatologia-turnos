@@ -1,5 +1,5 @@
 import { apiClient } from '../../../api/apiClient';
-import { type Specialty } from '../hooks/useEspecialties';
+import type { Specialty } from '../../../types';
 
 export const specialtiesService = {
   getAll: async (): Promise<Specialty[]> => {

@@ -6,6 +6,7 @@ export type AppointmentFilters = {
   patientId?: number;
   professionalId?: number;
   coverageId?: number;
+  notes?: string;
 };
 
 export const getAppointments = async (filters?: AppointmentFilters) => {

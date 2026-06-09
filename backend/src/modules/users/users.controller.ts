@@ -8,7 +8,6 @@ import {
   Delete,
   Query,
   UseGuards,
-  ParseIntPipe,
 } from '@nestjs/common';
 
 import { UsersService } from './users.service';
@@ -19,6 +18,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { RolesGuard } from '../auth/guards/roles-guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
+import { PositiveIntPipe } from 'src/common/pipes/positive-int.pipe';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -42,14 +42,14 @@ export class UsersController {
 
   @Get(':id')
   @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id', PositiveIntPipe) id: number) {
     return this.usersService.findOne(id);
   }
 
   @Patch(':id')
   @Roles(UserRole.ADMIN)
   update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', PositiveIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
     return this.usersService.update(id, updateUserDto);
@@ -57,7 +57,7 @@ export class UsersController {
 
   @Delete(':id')
   @Roles(UserRole.ADMIN)
-  remove(@Param('id', ParseIntPipe) id: number) {
+  remove(@Param('id', PositiveIntPipe) id: number) {
     return this.usersService.remove(id);
   }
 }

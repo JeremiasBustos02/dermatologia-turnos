@@ -5,7 +5,7 @@ import type { CreatePatientDTO } from '../../../types/index';
 export const usePatients = () => {
   return useQuery({
     queryKey: ['patients'],
-    queryFn: getPatients,
+    queryFn: () => getPatients(),
   });
 };
 
@@ -28,7 +28,7 @@ export const useUpdatePatient = () => {
 export const useDeletePatient = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) => deletePatient(id),
+    mutationFn: ({ id }: { id: number }) => deletePatient(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['patients'] }),
   });
 };

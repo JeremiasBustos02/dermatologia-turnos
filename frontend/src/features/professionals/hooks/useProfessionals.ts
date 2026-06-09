@@ -7,7 +7,7 @@ const PROFESSIONALS_KEY = ['professionals'];
 export const useProfessionals = () => {
   return useQuery({
     queryKey: PROFESSIONALS_KEY,
-    queryFn: getProfessionals,
+    queryFn: () => getProfessionals(),
   });
 };
 
@@ -24,7 +24,7 @@ export const useCreateProfessional = () => {
 export const useDeleteProfessional = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: deleteProfessional,
+    mutationFn: ({ id }: { id: number }) => deleteProfessional(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: PROFESSIONALS_KEY });
     },

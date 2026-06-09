@@ -16,7 +16,7 @@ export const ProfessionalsPage = () => {
 
   const handleDelete = (id: number) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este profesional?')) {
-      deleteMutation.mutate(id);
+      deleteMutation.mutate({ id });
     }
   };
 
@@ -36,7 +36,7 @@ export const ProfessionalsPage = () => {
       lastName: data.lastName,
       licenseNumber: data.licenseNumber || undefined,
       specialtyIds: Array.isArray(data.specialtyIds) ? data.specialtyIds.map(Number) : [],
-      coverageIds: Array.isArray(data.coverageIds) ? data.coverageIds.map(Number) : []
+      coverageIds: Array.isArray(data.coverageIds) ? data.coverageIds.map(Number) : [],
     };
 
     if (professionalToEdit) {

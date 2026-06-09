@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { X, Save } from 'lucide-react';
 import type { Professional } from '../../../types/index';
 import { useSpecialties } from '../../management/hooks/useEspecialties';
-import { useCoverages } from '../../management/hooks/useCoverages'; 
+import { useCoverages } from '../../management/hooks/useCoverages';
 
 interface ProfessionalModalProps {
   isOpen: boolean;

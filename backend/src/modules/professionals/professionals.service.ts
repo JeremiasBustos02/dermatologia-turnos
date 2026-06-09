@@ -3,17 +3,31 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
 import { FilterProfessionalsDto } from './dto/FilterProfessionalsDto';
+import * as bcrypt from 'bcrypt';
+import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class ProfessionalsService {
   constructor(private prisma: PrismaService) { }
 
   async create(dto: CreateProfessionalDto) {
+    const defaultPassword = dto.dni || '123456';
+    const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+
     return this.prisma.professional.create({
       data: {
         firstName: dto.firstName,
         lastName: dto.lastName,
         licenseNumber: dto.licenseNumber,
+        user: {
+          create: {
+            dni: dto.dni,
+            firstName: dto.firstName,
+            lastName: dto.lastName,
+            password: hashedPassword,
+            role: UserRole.PROFESSIONAL,
+          }
+        },
         specialties: {
           connect: dto.specialtyIds.map(id => ({ id })),
         },
@@ -22,8 +36,9 @@ export class ProfessionalsService {
         },
       },
       include: {
-        specialties: true,
-        coverages: true,
+        specialties: { select: { id: true, name: true } },
+        coverages: { select: { id: true, name: true } },
+        user: { select: { id: true, dni: true, role: true } }
       },
     });
   }
@@ -55,8 +70,8 @@ export class ProfessionalsService {
         skip,
         take: limit,
         include: {
-          specialties: true,
-          coverages: true,
+          specialties: { select: { id: true, name: true } },
+          coverages: { select: { id: true, name: true } },
         },
       }),
     ]);
@@ -77,8 +92,8 @@ export class ProfessionalsService {
     return this.prisma.professional.findUnique({
       where: { id },
       include: {
-        specialties: true,
-        coverages: true,
+        specialties: { select: { id: true, name: true } },
+        coverages: { select: { id: true, name: true } },
       },
     });
   }
@@ -100,8 +115,8 @@ export class ProfessionalsService {
         } : undefined,
       },
       include: {
-        specialties: true,
-        coverages: true,
+        specialties: { select: { id: true, name: true } },
+        coverages: { select: { id: true, name: true } },
       },
     });
   }

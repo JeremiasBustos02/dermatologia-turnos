@@ -32,12 +32,12 @@ export const Dashboard = () => {
   }, [location, navigate]);
 
   const formattedDate = date ? dayjs(date).format('YYYY-MM-DD') : undefined;
-  const { data: appointments = [], isLoading, isError } = useAppointments({ dateFrom: formattedDate });
+  const { data: appointments = [], isLoading, isError } = useAppointments({ dateFrom: formattedDate, dateTo: formattedDate });
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 relative">
       
-      {/* Toast Modal de Éxito de Nivel SaaS */}
+      {/* Toast Modal de Éxito */}
       {toast.show && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md transition-all duration-300 animate-fade-in">
           <div className="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center text-center max-w-sm w-full mx-4 border border-slate-100 transform transition-transform animate-in zoom-in-95 duration-200">

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { X } from 'lucide-react';
-import type { CreatePatientDTO, Patient } from '../../../types/index'; // <-- CreatePatientDTO ya se usa aquí
+import type { CreatePatientDTO, Patient } from '../../../types/index';
 import { useCoverages } from '../../management/hooks/useCoverages';
 
 interface PatientModalProps {
@@ -11,7 +11,6 @@ interface PatientModalProps {
   patientToEdit?: Patient | null;
 }
 
-// Declaramos la estructura del formulario de forma estricta para complacer a TypeScript
 interface PatientFormValues extends Omit<CreatePatientDTO, 'coverageId'> {
   coverageId: string | number;
 }

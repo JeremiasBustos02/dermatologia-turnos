@@ -1,3 +1,11 @@
+# OpenCode
+.opencode/
+.opencode/**
+
+# Skills
+.skills/
+.skills/**
+
 # Logs
 logs
 *.log

@@ -1,5 +1,5 @@
 import { apiClient } from '../../../api/apiClient';
-import { type Coverage } from '../hooks/useCoverages';
+import type { Coverage } from '../../../types';
 
 export const coveragesService = {
   getAll: async (): Promise<Coverage[]> => {

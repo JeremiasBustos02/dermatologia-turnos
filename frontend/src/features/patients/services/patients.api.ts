@@ -2,7 +2,9 @@ import { apiClient } from '../../../api/apiClient';
 import type { Patient, CreatePatientDTO } from '../../../types/index';
 
 export const getPatients = async (): Promise<Patient[]> => {
-  const { data } = await apiClient.get('/users?role=PATIENT');
+  const { data } = await apiClient.get('/users', {
+    params: { role: 'PATIENT' },
+  });
   return data.data ?? data;
 };
 

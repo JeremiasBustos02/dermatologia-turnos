@@ -1,23 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { specialtiesService } from '../service/specialties.api';
-
-export interface Specialty {
-  id: number;
-  name: string;
-  description?: string;
-}
+import type { Specialty } from '../../../types';
 
 export const useSpecialties = () => {
   return useQuery<Specialty[]>({
     queryKey: ['specialties'],
-    queryFn: specialtiesService.getAll, 
+    queryFn: () => specialtiesService.getAll(), 
   });
 };
 
 export const useCreateSpecialty = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: specialtiesService.create, 
+    mutationFn: (data: { name: string; description: string }) => specialtiesService.create(data), 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['specialties'] });
     },
@@ -27,7 +22,7 @@ export const useCreateSpecialty = () => {
 export const useDeleteSpecialty = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: specialtiesService.delete, 
+    mutationFn: ({ id }: { id: number }) => specialtiesService.delete(id), 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['specialties'] });
     },

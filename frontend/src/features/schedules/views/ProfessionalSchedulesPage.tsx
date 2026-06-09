@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, Calendar, Save, CheckSquare, Square, Clock } from 'lucide-react';
-import { useProfessionalSchedules, useSaveProfessionalSchedules, type DayOfWeek, type ScheduleItem } from '../hooks/useProfessionalSchedules';
+import { ArrowLeft, Plus, Trash2, Calendar, Save, CheckSquare, Square } from 'lucide-react';
+import { useProfessionalSchedules, useSaveProfessionalSchedules } from '../hooks/useSchedules';
+import type { DayOfWeek } from '../types';
 
 const DAYS_TRANSLATION: Record<DayOfWeek, string> = {
   MONDAY: 'Lunes',

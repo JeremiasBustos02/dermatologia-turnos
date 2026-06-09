@@ -3,7 +3,7 @@ import type { Professional, CreateProfessionalDTO } from '../../../types/index';
 
 export const getProfessionals = async (): Promise<Professional[]> => {
   const { data } = await apiClient.get('/professionals');
-  return data.data ?? data; 
+  return data.data ?? data;
 };
 
 export const createProfessional = async (professional: CreateProfessionalDTO): Promise<Professional> => {
