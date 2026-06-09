@@ -9,6 +9,11 @@ export type AppointmentFilters = {
   notes?: string;
 };
 
+export const getMyAppointments = async () => {
+  const { data } = await apiClient.get('/appointments/my-appointments');
+  return data;
+};
+
 export const getAppointments = async (filters?: AppointmentFilters) => {
   const { data } = await apiClient.get('/appointments', {
     params: filters ?? {},

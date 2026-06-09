@@ -40,6 +40,12 @@ export class AppointmentsController {
     return this.appointmentsService.findAll({ ...filters, clinicId });
   }
 
+  @Get('my-appointments')
+  @Roles(UserRole.PATIENT)
+  findMyAppointments(@Req() req: any) {
+    return this.appointmentsService.findMyAppointments(req.user.userId);
+  }
+
   @Get(':id')
   @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
   findOne(@Param('id', PositiveIntPipe) id: number) {

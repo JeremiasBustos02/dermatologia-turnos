@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createAppointment, getAppointments, updateAppointmentStatus } from "../services/appointments.api";
+import { createAppointment, getAppointments, getMyAppointments, updateAppointmentStatus } from "../services/appointments.api";
 import type { AppointmentFilters } from "../services/appointments.api";
 import { getAvailableSlots } from '../services/appointments.api';
 
@@ -15,6 +15,13 @@ export const useAvailableSlots = (professionalId: number, date: string) => {
     queryKey: ['availableSlots', professionalId, date],
     queryFn: () => getAvailableSlots(professionalId, date),
     enabled: !!professionalId && !!date, 
+  });
+};
+
+export const useMyAppointments = () => {
+  return useQuery({
+    queryKey: ['myAppointments'],
+    queryFn: getMyAppointments,
   });
 };
 

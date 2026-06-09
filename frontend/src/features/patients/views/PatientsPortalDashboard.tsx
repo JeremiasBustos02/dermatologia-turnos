@@ -1,7 +1,7 @@
 import { CalendarDays, Clock, MapPin, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
-import { useAppointments, useUpdateAppointmentStatus } from '../../appointments/hooks/useAppointments';
+import { useMyAppointments, useUpdateAppointmentStatus } from '../../appointments/hooks/useAppointments';
 import { useAuthStore } from '../../auth/auth.store';
 import type { Appointment } from '../../appointments/types';
 
@@ -9,7 +9,7 @@ export const PatientPortalDashboard = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   
-  const { data: appointments = [], isLoading } = useAppointments({ patientId: user?.userId });
+  const { data: appointments = [], isLoading } = useMyAppointments();
   const updateStatusMutation = useUpdateAppointmentStatus();
 
   const typedAppointments = appointments as Appointment[];

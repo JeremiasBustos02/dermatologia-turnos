@@ -301,6 +301,20 @@ export class AppointmentsService {
     return { data, meta: { total, page, lastPage: Math.ceil(total / limit) || 1 } };
   }
 
+  async findMyAppointments(patientId: number) {
+    return this.prisma.appointment.findMany({
+      where: { patientId },
+      orderBy: { dateTime: 'desc' },
+      select: {
+        id: true, clinicId: true, patientId: true, professionalId: true,
+        coverageId: true, dateTime: true, status: true, notes: true, createdAt: true,
+        patient: { select: { id: true, firstName: true, lastName: true, dni: true, email: true } },
+        professional: { select: { id: true, firstName: true, lastName: true, licenseNumber: true } },
+        coverage: { select: { id: true, name: true } },
+      },
+    });
+  }
+
   async findOne(id: number) {
     const appointment = await this.prisma.appointment.findUnique({
       where: { id },
