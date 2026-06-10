@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Get, UseGuards, Request, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 import { SetupPasswordDto } from './dto/setup-password.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtAuthGuard } from './guards/jwt-auth-guard';
@@ -19,6 +20,12 @@ export class AuthController {
   @ApiOperation({ summary: 'Iniciar sesión' })
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
+  }
+
+  @Post('register')
+  @ApiOperation({ summary: 'Registro público de paciente' })
+  register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto);
   }
 
   @Post('setup-password')

@@ -1,9 +1,10 @@
-import { Injectable, UnauthorizedException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ForbiddenException, BadRequestException, ConflictException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { SetupPasswordDto } from './dto/setup-password.dto';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
@@ -99,6 +100,45 @@ export class AuthService {
         });
 
         return { message: 'Contraseña establecida correctamente. Ya puede iniciar sesión.' };
+    }
+
+    async register(dto: RegisterDto) {
+        const [existingDni, existingEmail] = await Promise.all([
+            this.prisma.user.findUnique({ where: { dni: dto.dni } }),
+            this.prisma.user.findUnique({ where: { email: dto.email } }),
+        ]);
+
+        if (existingDni) {
+            throw new ConflictException('El DNI ya se encuentra registrado');
+        }
+
+        if (existingEmail) {
+            throw new ConflictException('El email ya se encuentra registrado');
+        }
+
+        const hashedPassword = await bcrypt.hash(dto.password, 10);
+
+        const user = await this.prisma.user.create({
+            data: {
+                dni: dto.dni,
+                firstName: dto.firstName,
+                lastName: dto.lastName,
+                email: dto.email,
+                password: hashedPassword,
+                role: 'PATIENT',
+                status: 'ACTIVE',
+            },
+            select: {
+                id: true,
+                dni: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+                role: true,
+            },
+        });
+
+        return user;
     }
 
     async refreshTokens(userId: number, refreshToken: string) {

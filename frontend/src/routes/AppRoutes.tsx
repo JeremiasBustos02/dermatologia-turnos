@@ -4,6 +4,7 @@ import { PatientPortalLayout } from '../layouts/PatientPortalLayout';
 import { ProtectedRoute } from './guards/ProtectedRoute';
 import { Dashboard } from '../features/appointments/views/Dashboard';
 import { Login } from '../features/auth/views/Login';
+import { RegisterPage } from '../features/auth/views/RegisterPage';
 import { SetupPasswordPage } from '../features/auth/views/SetupPasswordPage';
 import { ProfessionalsPage } from '../features/professionals/views/ProfessionalsPage';
 import { PatientsPage } from '../features/patients/views/PatientsPage';
@@ -25,6 +26,7 @@ export const AppRoutes = () => {
     <>
       <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route path="/auth/setup-password" element={<SetupPasswordPage />} />
 
       {/* =========================================================

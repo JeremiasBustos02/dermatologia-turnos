@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../auth.store';
 import { apiClient } from '../../../api/apiClient';
 
@@ -62,6 +62,12 @@ export const Login = () => {
         <button className="w-full bg-primary-600 text-white p-3 rounded-lg hover:bg-blue-700">
           Ingresar
         </button>
+        <p className="text-sm text-center text-slate-500 mt-4">
+          ¿No tienes cuenta?{' '}
+          <Link to="/register" className="text-blue-600 hover:underline font-medium">
+            Regístrate aquí
+          </Link>
+        </p>
       </form>
     </div>
   );
