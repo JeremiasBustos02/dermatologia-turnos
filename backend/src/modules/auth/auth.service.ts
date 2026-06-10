@@ -1,8 +1,9 @@
-import { Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
+import { SetupPasswordDto } from './dto/setup-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -45,6 +46,10 @@ export class AuthService {
             throw new UnauthorizedException('Credenciales inválidas');
         }
 
+        if (user.status !== 'ACTIVE') {
+            throw new ForbiddenException('Debe establecer su contraseña antes de iniciar sesión');
+        }
+
         const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
 
         if (!isPasswordValid) {
@@ -66,6 +71,34 @@ export class AuthService {
             },
             ...tokens,
         };
+    }
+
+    async setupPassword(dto: SetupPasswordDto) {
+        const user = await this.prisma.user.findFirst({
+            where: {
+                invitationToken: dto.token,
+                status: 'INVITED',
+                invitationExpiresAt: { gt: new Date() },
+            },
+        });
+
+        if (!user) {
+            throw new BadRequestException('Token de invitación inválido o expirado');
+        }
+
+        const hashedPassword = await bcrypt.hash(dto.password, 10);
+
+        await this.prisma.user.update({
+            where: { id: user.id },
+            data: {
+                password: hashedPassword,
+                status: 'ACTIVE',
+                invitationToken: null,
+                invitationExpiresAt: null,
+            },
+        });
+
+        return { message: 'Contraseña establecida correctamente. Ya puede iniciar sesión.' };
     }
 
     async refreshTokens(userId: number, refreshToken: string) {

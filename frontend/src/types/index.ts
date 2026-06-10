@@ -14,18 +14,19 @@ export interface Professional {
   firstName: string;
   lastName: string;
   licenseNumber?: string;
+  dni: string;
 
   specialties: Specialty[];
   coverages: Coverage[];
 }
 
 export interface CreateProfessionalDTO {
+  dni: string;
   firstName: string;
   lastName: string;
   licenseNumber: string;
-  specialtyIds: [];
-  coverageIds: [];
-  clinicId: number;
+  specialtyIds: number[];
+  coverageIds: number[];
 }
 
 export interface Patient {

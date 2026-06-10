@@ -15,15 +15,16 @@ interface ProfessionalModalProps {
 export const ProfessionalModal = ({ isOpen, onClose, onSubmit, professionalToEdit }: ProfessionalModalProps) => {
   const { data: specialties = [], isLoading: isLoadingSpecs } = useSpecialties();
   const { data: coverages = [], isLoading: isLoadingCovs } = useCoverages();
-  
+
   const [selectedSpecialties, setSelectedSpecialties] = useState<number[]>([]);
-  const [selectedCoverages, setSelectedCoverages] = useState<number[]>([]); 
+  const [selectedCoverages, setSelectedCoverages] = useState<number[]>([]);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     defaultValues: {
       firstName: '',
       lastName: '',
       licenseNumber: '',
+      dni: '',
     }
   });
 
@@ -36,12 +37,13 @@ export const ProfessionalModal = ({ isOpen, onClose, onSubmit, professionalToEdi
           firstName: professionalToEdit.firstName,
           lastName: professionalToEdit.lastName,
           licenseNumber: professionalToEdit.licenseNumber || '',
+          dni: professionalToEdit.dni || '',
         });
         setSelectedSpecialties(professionalToEdit.specialties?.map((s: any) => s.id) || []);
         setSelectedCoverages(professionalToEdit.coverages?.map((c: any) => c.id) || []);
       } else {
         // Modo Creación: Limpiamos todo el formulario por completo
-        reset({ firstName: '', lastName: '', licenseNumber: '' });
+        reset({ firstName: '', lastName: '', licenseNumber: '', dni: '' });
         setSelectedSpecialties([]);
         setSelectedCoverages([]);
       }
@@ -61,6 +63,8 @@ export const ProfessionalModal = ({ isOpen, onClose, onSubmit, professionalToEdi
   };
 
   const onFormSubmit = (formValues: any) => {
+    console.log("Valores del formulario:", formValues);
+
     onSubmit({
       ...formValues,
       specialtyIds: selectedSpecialties,
@@ -76,7 +80,7 @@ export const ProfessionalModal = ({ isOpen, onClose, onSubmit, professionalToEdi
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col border border-slate-200">
-        
+
         {/* Header */}
         <div className="flex justify-between items-center p-5 bg-slate-50 border-b border-slate-200 shrink-0">
           <h2 className="text-sm font-bold text-slate-800">
@@ -109,6 +113,16 @@ export const ProfessionalModal = ({ isOpen, onClose, onSubmit, professionalToEdi
               />
               {errors.lastName && <span className="text-[10px] text-red-500 mt-1 block">{errors.lastName.message}</span>}
             </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-slate-500 font-semibold">DNI *</label>
+            <input
+              {...register('dni', { required: 'El DNI es obligatorio' })}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-hidden focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 bg-white text-slate-800 font-medium text-xs"
+              placeholder="Ej. 12345678"
+            />
+            {errors.dni && <span className="text-[10px] text-red-500 mt-1 block">{errors.dni.message}</span>}
           </div>
 
           <div className="space-y-1">

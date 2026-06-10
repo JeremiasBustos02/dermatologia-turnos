@@ -31,6 +31,10 @@ model User {
   professionalProfile Professional?
   coverage            Coverage?       @relation(fields: [coverageId], references: [id])
 
+  status               UserStatus @default(INVITED)
+  invitationToken      String?    @unique
+  invitationExpiresAt  DateTime?
+
   @@index([coverageId])
   @@index([deletedAt])
   @@index([clinicId])
@@ -170,4 +174,9 @@ enum DayOfWeek {
   FRIDAY
   SATURDAY
   SUNDAY
+}
+
+enum UserStatus {
+  INVITED
+  ACTIVE
 }

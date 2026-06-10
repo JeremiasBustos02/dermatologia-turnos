@@ -4,6 +4,7 @@ import { PatientPortalLayout } from '../layouts/PatientPortalLayout';
 import { ProtectedRoute } from './guards/ProtectedRoute';
 import { Dashboard } from '../features/appointments/views/Dashboard';
 import { Login } from '../features/auth/views/Login';
+import { SetupPasswordPage } from '../features/auth/views/SetupPasswordPage';
 import { ProfessionalsPage } from '../features/professionals/views/ProfessionalsPage';
 import { PatientsPage } from '../features/patients/views/PatientsPage';
 import { ProfessionalSchedulesPage } from '../features/schedules/views/ProfessionalSchedulesPage';
@@ -24,6 +25,7 @@ export const AppRoutes = () => {
     <>
       <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/auth/setup-password" element={<SetupPasswordPage />} />
 
       {/* =========================================================
           MÓDULO CLÍNICO / BACKOFFICE

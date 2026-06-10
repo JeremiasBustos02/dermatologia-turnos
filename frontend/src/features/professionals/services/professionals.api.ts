@@ -6,7 +6,11 @@ export const getProfessionals = async (): Promise<Professional[]> => {
   return data.data ?? data;
 };
 
-export const createProfessional = async (professional: CreateProfessionalDTO): Promise<Professional> => {
+export interface CreateProfessionalResult extends Professional {
+  invitationToken: string;
+}
+
+export const createProfessional = async (professional: CreateProfessionalDTO): Promise<CreateProfessionalResult> => {
   const { data } = await apiClient.post('/professionals', professional);
   return data.data ?? data;
 };

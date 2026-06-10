@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Get, UseGuards, Request, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { SetupPasswordDto } from './dto/setup-password.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtAuthGuard } from './guards/jwt-auth-guard';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -18,6 +19,12 @@ export class AuthController {
   @ApiOperation({ summary: 'Iniciar sesión' })
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
+  }
+
+  @Post('setup-password')
+  @ApiOperation({ summary: 'Establecer contraseña por primera vez (invitación)' })
+  setupPassword(@Body() dto: SetupPasswordDto) {
+    return this.authService.setupPassword(dto);
   }
 
   @Post('refresh')

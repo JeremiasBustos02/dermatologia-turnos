@@ -4,6 +4,7 @@ import { ProfessionalsTable } from '../components/ProfessionalsTable';
 import { ProfessionalModal } from '../components/ProfessionalModal';
 import { useProfessionals, useDeleteProfessional, useCreateProfessional, useUpdateProfessional } from '../hooks/useProfessionals';
 import type { Professional, CreateProfessionalDTO } from '../../../types/index';
+import type { CreateProfessionalResult } from '../services/professionals.api';
 
 export const ProfessionalsPage = () => {
   const { data: professionals = [], isLoading, isError } = useProfessionals();
@@ -13,6 +14,7 @@ export const ProfessionalsPage = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [professionalToEdit, setProfessionalToEdit] = useState<Professional | null>(null);
+  const [invitationLink, setInvitationLink] = useState<string | null>(null);
 
   const handleDelete = (id: number) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este profesional?')) {
@@ -32,6 +34,7 @@ export const ProfessionalsPage = () => {
 
   const handleFormSubmit = (data: CreateProfessionalDTO) => {
     const sanitizedData = {
+      dni: data.dni,
       firstName: data.firstName,
       lastName: data.lastName,
       licenseNumber: data.licenseNumber || undefined,
@@ -51,11 +54,17 @@ export const ProfessionalsPage = () => {
       );
     } else {
       createMutation.mutate(sanitizedData as any, {
-        onSuccess: () => {
-          setIsModalOpen(false); 
+        onSuccess: (result: CreateProfessionalResult) => {
+          const link = `${window.location.origin}/auth/setup-password?token=${result.invitationToken}`;
+          setInvitationLink(link);
         }
       });
     }
+  };
+
+  const handleCloseInvitation = () => {
+    setInvitationLink(null);
+    setIsModalOpen(false);
   };
 
   return (
@@ -92,11 +101,43 @@ export const ProfessionalsPage = () => {
       )}
 
       <ProfessionalModal 
-        isOpen={isModalOpen}
+        isOpen={isModalOpen && !invitationLink}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleFormSubmit}
         professionalToEdit={professionalToEdit}
       />
+
+      {invitationLink && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200 p-6 space-y-4">
+            <h2 className="text-sm font-bold text-slate-800">Profesional Registrado</h2>
+            <p className="text-xs text-slate-600">
+              El profesional ha sido creado. Comparta este enlace para que establezca su contraseña:
+            </p>
+            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg p-3">
+              <input
+                readOnly
+                value={invitationLink}
+                className="flex-1 text-xs text-slate-700 bg-transparent outline-hidden break-all"
+              />
+              <button
+                onClick={() => navigator.clipboard.writeText(invitationLink)}
+                className="shrink-0 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition-colors"
+              >
+                Copiar
+              </button>
+            </div>
+            <div className="flex justify-end">
+              <button
+                onClick={handleCloseInvitation}
+                className="px-4 py-1.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-lg transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -64,7 +64,7 @@ export class AppointmentsService {
     const patientId = updateAppointmentDto.patientId ?? appointment.patientId;
     const professionalId = updateAppointmentDto.professionalId ?? appointment.professionalId;
     const coverageId = updateAppointmentDto.coverageId ?? appointment.coverageId;
-    
+
     // Resolvemos el clinicId del DTO o usamos el que ya tenía el turno originalmente
     const clinicId = updateAppointmentDto.clinicId ?? appointment.clinicId;
 
@@ -114,9 +114,9 @@ export class AppointmentsService {
 
     // Disparamos TODAS las peticiones a la Base de Datos AL MISMO TIEMPO
     const [patient, professional, schedules, existingAppointment] = await Promise.all([
-      tx.user.findUnique({ 
-        where: { id: patientId }, 
-        select: { id: true, role: true, clinicId: true } 
+      tx.user.findUnique({
+        where: { id: patientId },
+        select: { id: true, role: true, clinicId: true }
       }),
       tx.professional.findUnique({
         where: { id: professionalId },
@@ -150,7 +150,7 @@ export class AppointmentsService {
     // 2. Validar Profesional y Cobertura (En memoria)
     if (!professional) throw new NotFoundException(`Profesional con ID ${professionalId} no encontrado.`);
     if (professional.user?.clinicId !== clinicId) throw new BadRequestException('El profesional no pertenece a esta clínica.');
-    
+
     const acceptsCoverage = professional.coverages.some((c) => c.id === coverageId);
     if (!acceptsCoverage) throw new BadRequestException('El profesional no acepta esa cobertura médica.');
 
@@ -159,7 +159,7 @@ export class AppointmentsService {
 
     // 4. Validar Grilla Horaria (En memoria)
     if (!schedules.length) throw new BadRequestException('El profesional no atiende ese día.');
-    
+
     const appointmentMinutes = localDate.hour() * 60 + localDate.minute();
     const validSchedule = schedules.find((schedule) => {
       const [startHour, startMinute] = schedule.startTime.split(':').map(Number);
@@ -210,7 +210,7 @@ export class AppointmentsService {
     const allSlots = schedules.flatMap((schedule) => this.generateAvailableSlots(schedule));
     const takenSlots = appointments.map((a) => dayjs(a.dateTime).tz(TIMEZONE).format('HH:mm'));
     const availableSlots = allSlots.filter((slot) => !takenSlots.includes(slot));
-    
+
     const now = dayjs().tz(TIMEZONE);
     const isToday = localTargetDate.format('YYYY-MM-DD') === now.format('YYYY-MM-DD');
 
@@ -252,32 +252,35 @@ export class AppointmentsService {
   // =====================================================================
   // LISTADOS Y GESTIÓN DE ESTADOS
   // =====================================================================
-  async findAll(filters: FiltersAppointmentsDto & { clinicId?: number }) { // 👈 Tipado dinámico para filtrar opcionalmente por clínica
-    const start = performance.now();
+  async findAll(
+    filters: FiltersAppointmentsDto & { clinicId?: number },
+    user: { role: UserRole; userId: number }
+  ) {
     const { page = 1, limit = 10, ...queryFilters } = filters;
     const skip = (page - 1) * limit;
 
     const dateFrom = queryFilters.dateFrom ? dayjs.tz(queryFilters.dateFrom, TIMEZONE).startOf('day') : null;
     const dateTo = queryFilters.dateTo ? dayjs.tz(queryFilters.dateTo, TIMEZONE).endOf('day') : null;
 
-    if (dateFrom && dateTo && dateFrom.isAfter(dateTo)) {
-      throw new BadRequestException('dateFrom no puede ser mayor que dateTo.');
-    }
-
-    const dateTimeFilter = dateFrom || dateTo
+    const dateTimeFilter = (dateFrom || dateTo)
       ? {
-          ...(dateFrom ? { gte: dateFrom.toDate() } : {}),
-          ...(dateTo ? { lte: dateTo.toDate() } : {}),
-        }
+        ...(dateFrom ? { gte: dateFrom.toDate() } : {}),
+        ...(dateTo ? { lte: dateTo.toDate() } : {}),
+      }
       : undefined;
 
-    const whereCondition = {
-      clinicId: queryFilters.clinicId, // 👈 Agregamos el filtro en el listado general
+    const whereCondition: Prisma.AppointmentWhereInput = {
+      ...(queryFilters.clinicId ? { clinicId: queryFilters.clinicId } : {}),
+
       patientId: queryFilters.patientId,
-      professionalId: queryFilters.professionalId,
       coverageId: queryFilters.coverageId,
-      ...(dateTimeFilter ? { dateTime: dateTimeFilter } : {}),
-      notes: queryFilters.notes ? { contains: queryFilters.notes, mode: 'insensitive' as const } : undefined,
+      notes: queryFilters.notes ? { contains: queryFilters.notes, mode: 'insensitive' } : undefined,
+
+      professionalId: user.role === UserRole.PROFESSIONAL
+        ? await this.getProfessionalIdByUserId(user.userId)
+        : queryFilters.professionalId,
+
+      dateTime: dateTimeFilter,
     };
 
     const [total, data] = await Promise.all([
@@ -288,15 +291,12 @@ export class AppointmentsService {
         take: limit,
         orderBy: { dateTime: 'asc' },
         select: {
-          id: true, clinicId: true, patientId: true, professionalId: true, coverageId: true, dateTime: true, status: true, notes: true, createdAt: true,
-          patient: { select: { id: true, firstName: true, lastName: true, dni: true, email: true } },
-          professional: { select: { id: true, firstName: true, lastName: true, licenseNumber: true } },
-          coverage: { select: { id: true, name: true } },
+          id: true, clinicId: true, patientId: true, professionalId: true,
+          dateTime: true, status: true, patient: { select: { firstName: true, lastName: true } },
+          professional: { select: { firstName: true, lastName: true } }
         },
       }),
     ]);
-
-    console.log(`findAll appointments: ${(performance.now() - start).toFixed(2)} ms`);
 
     return { data, meta: { total, page, lastPage: Math.ceil(total / limit) || 1 } };
   }
@@ -315,25 +315,21 @@ export class AppointmentsService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, user?: { role: UserRole, userId: number }) {
     const appointment = await this.prisma.appointment.findUnique({
       where: { id },
-      select: {
-        id: true,
-        clinicId: true, // 👈 Agregado
-        patientId: true,
-        professionalId: true,
-        coverageId: true,
-        dateTime: true,
-        status: true,
-        notes: true,
-        createdAt: true,
-        patient: { select: { id: true, firstName: true, lastName: true, dni: true, email: true, clinicId: true } },
-        professional: { select: { id: true, firstName: true, lastName: true, licenseNumber: true } },
-        coverage: { select: { id: true, name: true } },
-      },
+      include: { patient: true, professional: true }
     });
-    if (!appointment) throw new NotFoundException(`Turno con ID ${id} no encontrado.`);
+
+    if (!appointment) throw new NotFoundException(`Turno ${id} no encontrado.`);
+
+    if (user?.role === UserRole.PROFESSIONAL) {
+      const profId = await this.getProfessionalIdByUserId(user.userId);
+      if (appointment.professionalId !== profId) {
+        throw new NotFoundException(`Turno no encontrado.`);
+      }
+    }
+
     return appointment;
   }
 
@@ -369,5 +365,13 @@ export class AppointmentsService {
     const appointment = await this.findOne(id);
     if (appointment.status !== AppointmentStatus.CONFIRMED) throw new BadRequestException('Solo se pueden completar turnos confirmados.');
     return this.prisma.appointment.update({ where: { id }, data: { status: AppointmentStatus.COMPLETED } });
+  }
+
+  private async getProfessionalIdByUserId(userId: number) {
+    const prof = await this.prisma.professional.findUnique({
+      where: { userId },
+      select: { id: true }
+    });
+    return prof?.id;
   }
 }

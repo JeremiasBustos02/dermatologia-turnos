@@ -1,45 +1,78 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
 import { FilterProfessionalsDto } from './dto/FilterProfessionalsDto';
 import * as bcrypt from 'bcrypt';
-import { UserRole } from '@prisma/client';
+import { UserRole, UserStatus } from '@prisma/client';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class ProfessionalsService {
   constructor(private prisma: PrismaService) { }
 
   async create(dto: CreateProfessionalDto) {
-    const defaultPassword = dto.dni || '123456';
-    const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+    const invitationToken = crypto.randomUUID();
+    const invitationExpiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
 
-    return this.prisma.professional.create({
-      data: {
-        firstName: dto.firstName,
-        lastName: dto.lastName,
-        licenseNumber: dto.licenseNumber,
-        user: {
-          create: {
+    return this.prisma.$transaction(async (tx) => {
+      let user = await tx.user.findUnique({ where: { dni: dto.dni } });
+
+      if (user) {
+        if (user.role === UserRole.PROFESSIONAL) {
+          throw new ConflictException('El DNI ya corresponde a un profesional registrado');
+        }
+
+        user = await tx.user.update({
+          where: { id: user.id },
+          data: {
+            firstName: dto.firstName,
+            lastName: dto.lastName,
+            role: UserRole.PROFESSIONAL,
+            status: UserStatus.INVITED,
+            invitationToken,
+            invitationExpiresAt,
+          },
+        });
+      } else {
+        const defaultPassword = crypto.randomUUID();
+        const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+
+        user = await tx.user.create({
+          data: {
             dni: dto.dni,
             firstName: dto.firstName,
             lastName: dto.lastName,
             password: hashedPassword,
             role: UserRole.PROFESSIONAL,
-          }
+            status: UserStatus.INVITED,
+            invitationToken,
+            invitationExpiresAt,
+          },
+        });
+      }
+
+      const professional = await tx.professional.create({
+        data: {
+          firstName: dto.firstName,
+          lastName: dto.lastName,
+          licenseNumber: dto.licenseNumber,
+          userId: user.id,
+          specialties: {
+            connect: dto.specialtyIds.map(id => ({ id })),
+          },
+          coverages: {
+            connect: dto.coverageIds.map(id => ({ id })),
+          },
         },
-        specialties: {
-          connect: dto.specialtyIds.map(id => ({ id })),
+        include: {
+          specialties: { select: { id: true, name: true } },
+          coverages: { select: { id: true, name: true } },
+          user: { select: { id: true, dni: true, role: true, status: true } },
         },
-        coverages: {
-          connect: dto.coverageIds.map(id => ({ id })),
-        },
-      },
-      include: {
-        specialties: { select: { id: true, name: true } },
-        coverages: { select: { id: true, name: true } },
-        user: { select: { id: true, dni: true, role: true } }
-      },
+      });
+
+      return { ...professional, invitationToken };
     });
   }
 
@@ -99,7 +132,7 @@ export class ProfessionalsService {
   }
 
   async update(id: number, updateProfessionalDto: UpdateProfessionalDto) {
-    const { specialtyIds, coverageIds, ...professionalData } = updateProfessionalDto;
+    const { specialtyIds, coverageIds, dni, ...professionalData } = updateProfessionalDto;
 
     return this.prisma.professional.update({
       where: { id },

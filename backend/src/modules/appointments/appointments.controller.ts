@@ -48,10 +48,14 @@ export class AppointmentsController {
   }
 
   @Get()
-  @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
+  @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.PROFESSIONAL)
   findAll(@Query() filters: FiltersAppointmentsDto, @Req() req: any) {
     const clinicId = req.user.clinicId;
-    return this.appointmentsService.findAll({ ...filters, clinicId });
+    // Pasamos el usuario completo para el filtrado dinámico
+    return this.appointmentsService.findAll(
+      { ...filters, clinicId }, 
+      { role: req.user.role, userId: req.user.userId }
+    );
   }
 
   @Get('my-appointments')
@@ -61,9 +65,9 @@ export class AppointmentsController {
   }
 
   @Get(':id')
-  @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
-  findOne(@Param('id', PositiveIntPipe) id: number) {
-    return this.appointmentsService.findOne(id);
+  @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.PROFESSIONAL)
+  async findOne(@Param('id', PositiveIntPipe) id: number, @Req() req: any) {
+    return this.appointmentsService.findOne(id, req.user);
   }
 
   @Patch(':id')
