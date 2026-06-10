@@ -15,6 +15,7 @@ import { Management } from '../features/management/views/Management';
 import { SysAdminDashboard } from '../features/clinics/views/SysAdminDashboard';
 import { PatientPortalDashboard } from '../features/patients/views/PatientsPortalDashboard';
 import { PatientNewAppointment } from '../features/patients/views/PatientNewAppointment';
+import { ProfilePage } from '../features/profile/views/ProfilePage';
 import { useAuthStore } from '../features/auth/auth.store';
 import { RoleSwitcherDevTool } from '../components/dev/RoleSwitcherDevTool';
 
@@ -40,6 +41,7 @@ export const AppRoutes = () => {
           <Route path="/appointments" element={<AppointmentsHistoryPage />} />
           <Route path="/appointments/new" element={<NewAppointmentPage />} />
           <Route path="/patients" element={<PatientsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           
           {/* Rutas exclusivas del Administrador */}
           <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
@@ -67,6 +69,7 @@ export const AppRoutes = () => {
           <Route path="/portal">
             <Route path="dashboard" element={<PatientPortalDashboard />} />
             <Route path="appointments/new" element={<PatientNewAppointment />} />
+            <Route path="profile" element={<ProfilePage />} />
           </Route>
         </Route>
       </Route>

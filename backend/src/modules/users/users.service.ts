@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateMyProfileDto } from './dto/update-my-profile.dto';
 import * as bcrypt from 'bcrypt';
 import { FilterUsersDto } from './dto/FilterUsersDto';
 import { UserRole } from '@prisma/client';
@@ -135,6 +136,100 @@ export class UsersService {
         coverage: { select: { id: true, name: true } },
       },
     });
+  }
+
+  async getMyProfile(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        dni: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        role: true,
+        clinicId: true,
+        clinic: { select: { id: true, name: true } },
+        coverage: { select: { id: true, name: true } },
+        professionalProfile: {
+          select: {
+            licenseNumber: true,
+            specialties: { select: { id: true, name: true } },
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`No existe un usuario con ID ${userId}`);
+    }
+
+    return {
+      userId: user.id,
+      dni: user.dni,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+      clinicId: user.clinicId,
+      clinic: user.clinic,
+      coverage: user.coverage,
+      professionalProfile: user.professionalProfile,
+    };
+  }
+
+  async updateMyProfile(userId: number, dto: UpdateMyProfileDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { professionalProfile: { select: { id: true } } },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`No existe un usuario con ID ${userId}`);
+    }
+
+    const { specialtyIds, licenseNumber, ...userData } = dto;
+
+    if (userData.email) {
+      const existingEmail = await this.prisma.user.findUnique({
+        where: { email: userData.email },
+      });
+      if (existingEmail && existingEmail.id !== userId) {
+        throw new BadRequestException('El email ya se encuentra registrado por otro usuario');
+      }
+    }
+
+    if (Object.keys(userData).length > 0) {
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: userData,
+      });
+    }
+
+    if (user.role === UserRole.PROFESSIONAL) {
+      const professionalData: Record<string, any> = {};
+      if (licenseNumber !== undefined) professionalData.licenseNumber = licenseNumber;
+      if (specialtyIds) {
+        professionalData.specialties = {
+          set: specialtyIds.map((id) => ({ id })),
+        };
+      }
+
+      if (Object.keys(professionalData).length > 0) {
+        await this.prisma.professional.upsert({
+          where: { userId },
+          create: {
+            userId,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            ...professionalData,
+          },
+          update: professionalData,
+        });
+      }
+    }
+
+    return this.getMyProfile(userId);
   }
 
   remove(id: number) {

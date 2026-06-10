@@ -8,11 +8,13 @@ import {
   Delete,
   Query,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateMyProfileDto } from './dto/update-my-profile.dto';
 import { FilterUsersDto } from './dto/FilterUsersDto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { RolesGuard } from '../auth/guards/roles-guard';
@@ -38,6 +40,19 @@ export class UsersController {
   @Roles(UserRole.ADMIN, UserRole.RECEPTIONIST)
   findAll(@Query() filters: FilterUsersDto) {
     return this.usersService.findAll(filters);
+  }
+
+  @Get('me')
+  getProfile(@Request() req) {
+    return this.usersService.getMyProfile(req.user.userId);
+  }
+
+  @Patch('me')
+  updateProfile(
+    @Request() req,
+    @Body() updateMyProfileDto: UpdateMyProfileDto,
+  ) {
+    return this.usersService.updateMyProfile(req.user.userId, updateMyProfileDto);
   }
 
   @Get(':id')

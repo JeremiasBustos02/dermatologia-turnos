@@ -34,9 +34,9 @@ export const AppointmentsHistoryPage = () => {
   const filteredAppointments = (appointments as Appointment[]).filter((app) => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      app.patient.dni.includes(searchLower) ||
-      app.patient.lastName.toLowerCase().includes(searchLower) ||
-      app.professional.lastName.toLowerCase().includes(searchLower)
+      app.patient?.dni?.toLowerCase().includes(searchLower) ||
+      app.patient?.lastName?.toLowerCase().includes(searchLower) ||
+      app.professional?.lastName?.toLowerCase().includes(searchLower)
     );
   });
 
@@ -117,12 +117,12 @@ export const AppointmentsHistoryPage = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span className="font-semibold text-slate-800 block">
-                          {appointment.patient.firstName} {appointment.patient.lastName}
+                          {appointment.patient?.firstName ?? 'N/A'} {appointment.patient?.lastName ?? 'N/A'}
                         </span>
-                        <span className="text-[11px] text-slate-400 font-normal block mt-0.5">DNI {appointment.patient.dni}</span>
+                        <span className="text-[11px] text-slate-400 font-normal block mt-0.5">DNI {appointment.patient?.dni ?? 'N/A'}</span>
                       </td>
                       <td className="px-6 py-4 text-slate-700 font-semibold">
-                        {appointment.professional.firstName} {appointment.professional.lastName}
+                        {appointment.professional?.firstName ?? 'N/A'} {appointment.professional?.lastName ?? 'N/A'}
                       </td>
                       <td className="px-6 py-4">
                         <StatusBadge status={appointment.status} />

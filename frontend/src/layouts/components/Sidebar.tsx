@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, Users, Stethoscope, LogOut, ShieldCheck, SlidersHorizontal } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Users, Stethoscope, LogOut, ShieldCheck, SlidersHorizontal, UserCircle } from 'lucide-react';
 import type { UserRole } from '../../types/index';
 
 interface SidebarProps {
@@ -36,6 +36,11 @@ export const Sidebar = ({ role, onLogout }: SidebarProps) => {
           <NavLink to="/dashboard" className={navLinkClass} end>
             <LayoutDashboard size={18} />
             <span>Dashboard</span>
+          </NavLink>
+
+          <NavLink to="/profile" className={navLinkClass}>
+            <UserCircle size={18} />
+            <span>Mi Perfil</span>
           </NavLink>
           
           <NavLink to="/appointments" className={navLinkClass}>

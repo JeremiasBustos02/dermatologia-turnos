@@ -1,6 +1,6 @@
-import { useNavigate, Outlet } from 'react-router-dom';
+import { useNavigate, Outlet, Link } from 'react-router-dom';
 import { useAuthStore } from '../features/auth/auth.store';
-import { LogOut, Stethoscope } from 'lucide-react';
+import { LogOut, Stethoscope, UserCircle } from 'lucide-react';
 
 export const PatientPortalLayout = () => {
   const navigate = useNavigate();
@@ -25,6 +25,13 @@ export const PatientPortalLayout = () => {
             <span className="text-sm text-slate-500 hidden sm:block">
               {user?.firstName} {user?.lastName}
             </span>
+            <Link
+              to="/portal/profile"
+              className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <UserCircle size={14} />
+              Mi Perfil
+            </Link>
             <button
               onClick={handleLogout}
               className="flex items-center gap-1.5 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition-colors"
