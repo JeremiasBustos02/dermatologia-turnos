@@ -36,7 +36,7 @@ export const createAppointment = async (appointment: any) => {
 
 export const selfBooking = async (data: {
   professionalId: number;
-  coverageId: number;
+  coverageId?: number;
   dateTime: string;
   notes?: string;
 }) => {

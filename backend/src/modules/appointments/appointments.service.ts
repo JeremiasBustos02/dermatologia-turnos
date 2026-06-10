@@ -102,7 +102,7 @@ export class AppointmentsService {
   private async validateAllBookingRules(
     patientId: number,
     professionalId: number,
-    coverageId: number,
+    coverageId: number | null | undefined,
     clinicId: number, // 👈 4° parámetro
     appointmentDate: Date, // 👈 5° parámetro
     ignoreAppointmentId?: number,
@@ -151,8 +151,11 @@ export class AppointmentsService {
     if (!professional) throw new NotFoundException(`Profesional con ID ${professionalId} no encontrado.`);
     if (professional.user?.clinicId !== clinicId) throw new BadRequestException('El profesional no pertenece a esta clínica.');
 
-    const acceptsCoverage = professional.coverages.some((c) => c.id === coverageId);
-    if (!acceptsCoverage) throw new BadRequestException('El profesional no acepta esa cobertura médica.');
+    // Si se proporciona un coverageId, validar que el profesional lo acepte
+    if (coverageId !== undefined) {
+      const acceptsCoverage = professional.coverages.some((c) => c.id === coverageId);
+      if (!acceptsCoverage) throw new BadRequestException('El profesional no acepta esa cobertura médica.');
+    }
 
     // 3. Validar Conflictos
     if (existingAppointment) throw new BadRequestException('Ya existe un turno reservado para esa fecha y horario.');

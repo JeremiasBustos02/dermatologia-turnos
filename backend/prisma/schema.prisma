@@ -115,7 +115,7 @@ model Appointment {
   id             Int               @id @default(autoincrement())
   patientId      Int
   professionalId Int
-  coverageId     Int
+  coverageId     Int?
 
   clinicId       Int
   clinic         Clinic            @relation(fields: [clinicId], references: [id])
@@ -124,7 +124,7 @@ model Appointment {
   status         AppointmentStatus @default(PENDING)
   notes          String?
   createdAt      DateTime          @default(now())
-  coverage       Coverage          @relation(fields: [coverageId], references: [id])
+  coverage       Coverage?       @relation(fields: [coverageId], references: [id])
   patient        User              @relation("PatientAppointments", fields: [patientId], references: [id])
   professional   Professional      @relation("ProfessionalAppointments", fields: [professionalId], references: [id])
   medicalRecord  MedicalRecord?

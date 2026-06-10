@@ -6,7 +6,7 @@ import { SearchablePicker } from '../../../../components/shared/SearchablePicker
 import type { Professional } from '../../../../types/index';
 
 interface ProfessionalStepProps {
-  onNext: (data: { professionalId: number; coverageId: number }) => void;
+  onNext: (data: { professionalId: number; coverageId?: number }) => void;
   defaultProfessionalId?: number;
   defaultCoverageId?: number;
 }
@@ -20,7 +20,7 @@ export const ProfessionalStep = ({ onNext, defaultProfessionalId, defaultCoverag
   const [selectedCoverage, setSelectedCoverage] = useState<number | undefined>(defaultCoverageId);
 
   useEffect(() => {
-    if (selectedProfessional && selectedCoverage) {
+    if (selectedProfessional) {
       onNext({ professionalId: selectedProfessional, coverageId: selectedCoverage });
     }
   }, [selectedProfessional, selectedCoverage]);
@@ -93,7 +93,7 @@ export const ProfessionalStep = ({ onNext, defaultProfessionalId, defaultCoverag
                   onChange={(e) => setSelectedCoverage(e.target.value ? Number(e.target.value) : undefined)}
                   className="w-full px-4 py-3 border border-slate-300 rounded-lg text-sm outline-hidden bg-white font-semibold text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer shadow-2xs"
                 >
-                  <option value="" disabled>Elegir cobertura médica...</option>
+                  <option value="">Particular (Sin Obra Social)</option>
                   {coverages.map(cov => (
                     <option key={cov.id} value={cov.id}>{cov.name}</option>
                   ))}

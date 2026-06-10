@@ -16,7 +16,9 @@ export const SummaryStep = ({ appointmentData, patientOverride }: SummaryStepPro
 
   const patient = patientOverride ?? patients.find(p => p.id === appointmentData.patientId);
   const professional = professionals.find(p => p.id === appointmentData.professionalId);
-  const coverageName = professional?.coverages.find(c => c.id === appointmentData.coverageId)?.name || 'N/A';   
+  const coverageName = appointmentData.coverageId
+    ? professional?.coverages.find(c => c.id === appointmentData.coverageId)?.name || 'N/A'
+    : 'Particular (Sin Obra Social)';   
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">

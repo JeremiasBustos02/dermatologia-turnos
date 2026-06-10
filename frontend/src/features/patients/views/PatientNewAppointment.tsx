@@ -38,7 +38,7 @@ export const PatientNewAppointment = () => {
 
     selfBookingMutation.mutate({
       professionalId: appointmentData.professionalId,
-      coverageId: appointmentData.coverageId || 0,
+      ...(appointmentData.coverageId ? { coverageId: appointmentData.coverageId } : {}),
       dateTime: appointmentData.dateTime,
       notes: 'Turno autogestionado desde el Portal del Paciente.',
     }, {

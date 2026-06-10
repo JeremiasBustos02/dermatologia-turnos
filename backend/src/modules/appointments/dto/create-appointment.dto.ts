@@ -23,11 +23,12 @@ export class CreateAppointmentDto {
   @Type(() => Number)
   professionalId!: number;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsInt()
   @IsPositive()
   @Type(() => Number)
-  coverageId!: number;
+  coverageId?: number;
 
   @ApiProperty()
   @IsDateString()
